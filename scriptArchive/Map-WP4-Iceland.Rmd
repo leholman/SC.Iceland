@@ -1,0 +1,84 @@
+---
+title: "Map-WP4"
+author: "Emilia Marie Rolander Langkjær"
+date: '2022-05-30'
+output: html_document
+---
+
+#This R markdown is creating a map over Iceland containing relevant geological information as well as sites relevant to the project.
+
+Marine map as done in https://mikkovihtakari.github.io/ggOceanMaps/articles/ggOceanMaps.html 
+
+Load in the packages for ocean mapping
+```{r}
+library(ggOceanMapsData)
+library(ggOceanMaps)
+library("rgdal")
+```
+
+We map using the basemap command
+```{r}
+basemap(limits = 60)
+```
+
+Now we will specify the area we want to map. 
+```{r}
+basemap(limits = c(-25, -12, 63, 67))
+
+```
+
+Now we add on the depth of the ocean.
+```{r}
+basemap(limits = c(-25, -12, 63, 67), bathymetry = TRUE)
+```
+
+We can also add glaciers
+```{r}
+basemap(limits = c(-25, -12, 63, 67), bathymetry = TRUE, glaciers = TRUE)
+```
+Let's zoom into the north icelandic shelf
+```{r}
+basemap(limits = c(-21.5, -16.5, 65.5, 67), bathymetry = TRUE)
+```
+
+
+Let's put in some data points.
+```{r}
+site_core <- data.frame(lon = c(-17.700265, -18.169859, -18.527697, -19.50553), lat = c(66.551726, 66.236195, 66.213897, 66.500766))
+
+basemap(limits = c(-21.5, -16.5, 65.5, 67), bathymetry = TRUE)+
+  geom_point(data = transform_coord(site_core), aes(x = lon, y = lat), color = "red")
+```
+
+Right now we can't add the data points on land - I'll have to figure out how ot do that. 
+
+Let's work on the layout of this figure now. 
+
+```{r}
+basemap(limits = c(-21.5, -16.5, 65.5, 67), bathymetry = TRUE, land.col = "dimgray", land.border.col = NA)+
+  geom_point(data = transform_coord(site_core), aes(x = lon, y = lat), color = "red")
+```
+
+Adding scalebar and north arrow
+```{r}
+basemap(limits = c(-21.5, -16.5, 65.5, 67), bathymetry = TRUE, land.col = "darkgrey", land.border.col = NA)+
+  geom_point(data = transform_coord(site_core), aes(x = lon, y = lat), color = "red")+
+  annotation_scale(location = "br") + 
+  annotation_north_arrow(location = "tr", which_north = "true")
+```
+Let's resize the north arrow
+```{r}
+basemap(limits = c(-21.5, -16.5, 65.5, 67), bathymetry = TRUE, land.col = "darkgrey", land.border.col = NA)+
+  geom_point(data = transform_coord(site_core), aes(x = lon, y = lat), color = "red")+
+  annotation_scale(location = "br") + 
+  annotation_north_arrow(location = "tr", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
+```
+
+Let's try without the zoom
+```{r}
+basemap(limits = c(-25, -12, 63, 67), bathymetry = TRUE, glaciers = TRUE, land.col = "darkgrey", land.border.col = NA) + 
+  geom_point(data = transform_coord(site_core), aes(x = lon, y = lat), color = "red")+
+  annotation_scale(location = "br") + 
+  annotation_north_arrow(location = "tr", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
+```
+
