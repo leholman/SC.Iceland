@@ -7,7 +7,7 @@ library(sf)
 library(ggspatial)
 
 ##
-raw.metadata <- read.csv("CoreMetaData.csv")
+raw.metadata <- read.csv("metadata/CoreMetaData.csv")
 metadata <- raw.metadata[raw.metadata$CoreID!="GC06",]
 
 
@@ -17,10 +17,10 @@ limits = c(-25, -12, 63, 67)
 
 
 pdf("Maps/OverviewV1.pdf",height = 6,width = 9)
-#basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE)+
-  basemap(limits = c(-25, -12, 63, 67),rotate = TRUE)+
+basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE)+
+  #basemap(limits = c(-25, -12, 63, 67),rotate = TRUE)+
     ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = "red",crs = 4326)+
-  ggspatial::geom_spatial_text(aes(x = Lon, y = Lat+0.04,label=CoreID),data = metadata, color = "darkred",cex=2)
+  #ggspatial::geom_spatial_text(aes(x = Lon, y = Lat+0.04,label=CoreID),data = metadata, color = "darkred",cex=2)+
   xlab("Longitude")+
   ylab("Latitude")+
   annotation_scale(location = "bl")+ 
