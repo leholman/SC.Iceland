@@ -4,8 +4,6 @@ library("seqinr")
 library(dada2)
 
 
-test <- collapseNoMismatch(t(read.csv("~/Desktop/WP4.LN2/6.mappings/OTUtabs/EUK.LN2.raw.csv",row.names = 1)))
-
 # bring in metadata
 ages<-read.csv("metadata/AgeOut.csv") 
 metadata.B05 <- read.csv("metadata/B05-2006.metadata.csv")
