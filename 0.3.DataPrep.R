@@ -2,6 +2,9 @@
 
 library("seqinr")
 library(dada2)
+library(Biostrings)
+
+set.seed(1234)
 
 
 # bring in metadata
@@ -10,10 +13,7 @@ metadata.B05 <- read.csv("metadata/B05-2006.metadata.csv")
 metadata.LN1 <- read.csv("metadata/LN1.metadata.csv")
 metadata.LN2 <- read.csv("metadata/LN2.metadata.csv")
 
-#metadata$rep <- gsub(".*-([0-9])$","\\1",metadata$SampleID)
-
 ## some cleaning functions
-
 minimumReads <- function(data, minreads) {
   # Ensure the input is either a dataframe or matrix and is numeric
   if (!is.data.frame(data) && !is.matrix(data)) {stop("Input must be a dataframe or matrix")}
@@ -43,8 +43,6 @@ minimumReads <- function(data, minreads) {
   # Return the cleaned data
   return(outdata)
 }
-
-
 minimumReps <- function(data,min_obs) {
   # Ensure the input is either a dataframe or matrix and is numeric
   if (!is.data.frame(data) && !is.matrix(data)) {stop("Input must be a dataframe or matrix")}
@@ -74,7 +72,6 @@ minimumReps <- function(data,min_obs) {
     return(as.data.frame(filtered_data))
   }
 }
-
 dataCleanBy <- function(inputdata, cleaningdata, method) {
   # Ensure the input is either a dataframe or matrix and is numeric
   if (!is.data.frame(inputdata) && !is.matrix(inputdata)) {stop("Input must be a dataframe or matrix")}
@@ -279,8 +276,8 @@ LN2.EUK <- read.csv("rawdata/EUK.LN2.lulu.csv")
 LN2.EUK.asv <- read.fasta("rawdata/ASVs/EUK.LN2.DADA2.ASVs.fasta",as.string = TRUE)
 LN2.EUK.tax <- read.csv("taxonomy/EUK.LN2.parsed.csv",row.names = 1)
 # set aside negative and experimental samples 
-neg <- na.omit(colnames(LN2.EUK)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.EUK)), gsub("-","_",gsub("_[0-9]-[0-9]","",metadata.LN2$UniqueID)))] == "ControlN"])
-exp <- na.omit(colnames(LN2.EUK)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.EUK)), gsub("-","_",gsub("_[0-9]-[0-9]","",metadata.LN2$UniqueID)))] == "Experimental"])
+neg <- na.omit(colnames(LN2.EUK)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.EUK)), gsub("-","_",gsub("_[0-9]-[0-9]|_B-[0-9]","",metadata.LN2$UniqueID)))] == "ControlN"])
+exp <- na.omit(colnames(LN2.EUK)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.EUK)), gsub("-","_",gsub("_[0-9]-[0-9]|_B-[0-9]","",metadata.LN2$UniqueID)))] == "Experimental"])
 # create data subsets
 LN2.EUK.neg <- LN2.EUK[,match(neg,colnames(LN2.EUK))]
 LN2.EUK.exp <- LN2.EUK[,match(exp,colnames(LN2.EUK))]
@@ -302,8 +299,8 @@ LN2.MAM <- read.csv("rawdata/MAM.LN2.raw.names.csv")
 LN2.MAM.asv <- read.fasta("rawdata/ASVs/MAM.LN2.DADA2.ASVs.fasta",as.string = TRUE)
 LN2.MAM.tax <- read.csv("taxonomy/MAM.LN2.parsed.csv",row.names = 1)
 # set aside negative and experimental samples 
-neg <- na.omit(colnames(LN2.MAM)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.MAM)), gsub("-","_",gsub("_[0-9]-[0-9]","",metadata.LN2$UniqueID)))] == "ControlN"])
-exp <- na.omit(colnames(LN2.MAM)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.MAM)), gsub("-","_",gsub("_[0-9]-[0-9]","",metadata.LN2$UniqueID)))] == "Experimental"])
+neg <- na.omit(colnames(LN2.MAM)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.MAM)), gsub("-","_",gsub("_[0-9]-[0-9]|_B-[0-9]","",metadata.LN2$UniqueID)))] == "ControlN"])
+exp <- na.omit(colnames(LN2.MAM)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.MAM)), gsub("-","_",gsub("_[0-9]-[0-9]|_B-[0-9]","",metadata.LN2$UniqueID)))] == "Experimental"])
 # create data subsets
 LN2.MAM.neg <- LN2.MAM[,match(neg,colnames(LN2.MAM))]
 LN2.MAM.exp <- LN2.MAM[,match(exp,colnames(LN2.MAM))]
@@ -325,8 +322,8 @@ LN2.RIZ <- read.csv("rawdata/RIZ.LN2.raw.names.csv")
 LN2.RIZ.asv <- read.fasta("rawdata/ASVs/RIZ.LN2.DADA2.ASVs.fasta",as.string = TRUE)
 LN2.RIZ.tax <- read.csv("taxonomy/RIZ.LN2.parsed.csv",row.names = 1)
 # set aside negative and experimental samples 
-neg <- na.omit(colnames(LN2.RIZ)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.RIZ)), gsub("-","_",gsub("_[0-9]-[0-9]","",metadata.LN2$UniqueID)))] == "ControlN"])
-exp <- na.omit(colnames(LN2.RIZ)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.RIZ)), gsub("-","_",gsub("_[0-9]-[0-9]","",metadata.LN2$UniqueID)))] == "Experimental"])
+neg <- na.omit(colnames(LN2.RIZ)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.RIZ)), gsub("-","_",gsub("_[0-9]-[0-9]|_B-[0-9]","",metadata.LN2$UniqueID)))] == "ControlN"])
+exp <- na.omit(colnames(LN2.RIZ)[metadata.LN2$SampleType[match(gsub("\\.","_",colnames(LN2.RIZ)), gsub("-","_",gsub("_[0-9]-[0-9]|_B-[0-9]","",metadata.LN2$UniqueID)))] == "Experimental"])
 # create data subsets
 LN2.RIZ.neg <- LN2.RIZ[,match(neg,colnames(LN2.RIZ))]
 LN2.RIZ.exp <- LN2.RIZ[,match(exp,colnames(LN2.RIZ))]
@@ -346,6 +343,129 @@ write.csv(file="cleaneddata/negativedata/neg.LN2.RIZ.csv",cbind(unlist(LN2.RIZ.a
 
 
 
+
+## Now lets combine into cores 
+EUK.B05.clean <- read.csv("cleaneddata/B05.EUK.csv",row.names = 2)[,-1]
+colnames(EUK.B05.clean) <- gsub("\\.", "_", gsub("^EUK\\.IS\\.(GC[0-9]+\\.[0-9]+\\.[0-9]+)\\..*$", "\\1", colnames(EUK.B05.clean))) 
+EUK.LN1.clean <- read.csv("cleaneddata/LN1.EUK.csv",row.names = 2)[,-1]
+colnames(EUK.LN1.clean)  <- gsub("\\.","_",colnames(EUK.LN1.clean))
+EUK.LN2.clean <- read.csv("cleaneddata/LN2.EUK.csv",row.names = 2)[,-1]
+colnames(EUK.LN2.clean)  <- gsub("\\.","_",colnames(EUK.LN2.clean))
+
+#combine all tables
+EUK.combined <- as.data.frame(t(mergeSequenceTables(t(as.matrix(EUK.B05.clean)),
+                    t(as.matrix(EUK.LN1.clean)),
+                    t(as.matrix(EUK.LN2.clean)),
+                    tryRC = TRUE)))
+
+#get rid of short and long seqs
+EUK.combined.2 <- EUK.combined[nchar(row.names(EUK.combined))>70 & nchar(row.names(EUK.combined))<170,]
+#output ASVs
+ASVs <- DNAStringSet(rownames(EUK.combined.2))
+names(ASVs) <- paste0("ASV_",1:length(ASVs))
+writeXStringSet(ASVs,"cleaneddata/ASVs/EUK.cleaned.fasta", append=FALSE,
+                compress=FALSE, compression_level=NA, format="fasta")
+EUK.combined.3 <- EUK.combined.2[,order(colnames(EUK.combined.2))]
+rownames(EUK.combined.3) <- paste0("ASV_",1:length(ASVs))
+
+#reassign using PR2 and save output 
+PR2assign <- assignTaxonomy( unlist(read.fasta("cleaneddata/ASVs/EUK.cleaned.fasta",as.string = T)),refFasta = "taxonomy/pr2_version_5.0.0_SSU_dada2.fasta.gz",tryRC = TRUE,multithread = TRUE,taxLevels = c("Domain","Supergroup","Division","Subdivision","Class","Order","Family","Genus","Species"),outputBootstraps = TRUE)
+PR2master <- cbind(names(ASVs),PR2assign$tax,PR2assign$boot)
+write.csv(PR2master,"taxonomy/EUK.cleaned.PR2.csv")
+
+#subset by core
+EUK.GC01 <- EUK.combined.3[,grep("GC1",colnames(EUK.combined.3))]
+EUK.GC06 <- EUK.combined.3[,grep("GC6",colnames(EUK.combined.3))]
+EUK.PC019 <- EUK.combined.3[,grep("PC019",colnames(EUK.combined.3))]
+EUK.PC022 <- EUK.combined.3[,grep("PC022",colnames(EUK.combined.3))]
+
+## write core data 
+write.csv(EUK.GC01,"cleaneddata/combinedcoredata/EUK.GC01.csv")
+write.csv(EUK.GC06,"cleaneddata/combinedcoredata/EUK.GC06.csv")
+write.csv(EUK.PC019,"cleaneddata/combinedcoredata/EUK.PC019.csv")
+write.csv(EUK.PC022,"cleaneddata/combinedcoredata/EUK.PC022.csv")
+
+
+
+# now MAM
+
+
+## Now lets combine into cores 
+MAM.B05.clean <- read.csv("cleaneddata/B05.MAM.csv",row.names = 2)[,-1]
+colnames(MAM.B05.clean) <- gsub("\\.", "_", gsub("^MAM\\.IS\\.(GC[0-9]+\\.[0-9]+\\.[0-9]+)\\..*$", "\\1", colnames(MAM.B05.clean))) 
+MAM.LN1.clean <- read.csv("cleaneddata/LN1.MAM.csv",row.names = 2)[,-1]
+colnames(MAM.LN1.clean)  <- gsub("\\.","_",colnames(MAM.LN1.clean))
+MAM.LN2.clean <- read.csv("cleaneddata/LN2.MAM.csv",row.names = 2)[,-1]
+colnames(MAM.LN2.clean)  <- gsub("\\.","_",colnames(MAM.LN2.clean))
+
+#combine all tables
+MAM.combined <- as.data.frame(t(mergeSequenceTables(t(as.matrix(MAM.B05.clean)),
+                                                    t(as.matrix(MAM.LN1.clean)),
+                                                    t(as.matrix(MAM.LN2.clean)),
+                                                    tryRC = TRUE)))
+
+#get rid of short and long seqs
+MAM.combined.2 <- MAM.combined[nchar(row.names(MAM.combined))>80 & nchar(row.names(MAM.combined))<120,]
+#output ASVs
+ASVs <- DNAStringSet(rownames(MAM.combined.2))
+names(ASVs) <- paste0("ASV_",1:length(ASVs))
+writeXStringSet(ASVs,"cleaneddata/ASVs/MAM.cleaned.fasta", append=FALSE,
+                compress=FALSE, compression_level=NA, format="fasta")
+MAM.combined.3 <- MAM.combined.2[,order(colnames(MAM.combined.2))]
+rownames(MAM.combined.3) <- paste0("ASV_",1:length(ASVs))
+
+#subset by core
+MAM.GC01 <- MAM.combined.3[,grep("GC1",colnames(MAM.combined.3))]
+MAM.GC06 <- MAM.combined.3[,grep("GC6",colnames(MAM.combined.3))]
+MAM.PC019 <- MAM.combined.3[,grep("PC019",colnames(MAM.combined.3))]
+MAM.PC022 <- MAM.combined.3[,grep("PC022",colnames(MAM.combined.3))]
+
+## write core data 
+write.csv(MAM.GC01,"cleaneddata/combinedcoredata/MAM.GC01.csv")
+write.csv(MAM.GC06,"cleaneddata/combinedcoredata/MAM.GC06.csv")
+write.csv(MAM.PC019,"cleaneddata/combinedcoredata/MAM.PC019.csv")
+write.csv(MAM.PC022,"cleaneddata/combinedcoredata/MAM.PC022.csv")
+
+
+
+# now RIZ
+
+
+## Now lets combine into cores 
+RIZ.B05.clean <- read.csv("cleaneddata/B05.RIZ.csv",row.names = 2)[,-1]
+colnames(RIZ.B05.clean) <- gsub("\\.", "_", gsub("^RIZ\\.IS\\.(GC[0-9]+\\.[0-9]+\\.[0-9]+)\\..*$", "\\1", colnames(RIZ.B05.clean))) 
+RIZ.LN1.clean <- read.csv("cleaneddata/LN1.RIZ.csv",row.names = 2)[,-1]
+colnames(RIZ.LN1.clean)  <- gsub("\\.","_",colnames(RIZ.LN1.clean))
+RIZ.LN2.clean <- read.csv("cleaneddata/LN2.RIZ.csv",row.names = 2)[,-1]
+colnames(RIZ.LN2.clean)  <- gsub("\\.","_",colnames(RIZ.LN2.clean))
+
+#combine all tables
+RIZ.combined <- as.data.frame(t(mergeSequenceTables(t(as.matrix(RIZ.B05.clean)),
+                                                    t(as.matrix(RIZ.LN1.clean)),
+                                                    t(as.matrix(RIZ.LN2.clean)),
+                                                    tryRC = TRUE)))
+
+#get rid of short and long seqs
+RIZ.combined.2 <- RIZ.combined[nchar(row.names(RIZ.combined))>80 & nchar(row.names(RIZ.combined))<150,]
+#output ASVs
+ASVs <- DNAStringSet(rownames(RIZ.combined.2))
+names(ASVs) <- paste0("ASV_",1:length(ASVs))
+writeXStringSet(ASVs,"cleaneddata/ASVs/RIZ.cleaned.fasta", append=FALSE,
+                compress=FALSE, compression_level=NA, format="fasta")
+RIZ.combined.3 <- RIZ.combined.2[,order(colnames(RIZ.combined.2))]
+rownames(RIZ.combined.3) <- paste0("ASV_",1:length(ASVs))
+
+#subset by core
+RIZ.GC01 <- RIZ.combined.3[,grep("GC1",colnames(RIZ.combined.3))]
+RIZ.GC06 <- RIZ.combined.3[,grep("GC6",colnames(RIZ.combined.3))]
+RIZ.PC019 <- RIZ.combined.3[,grep("PC019",colnames(RIZ.combined.3))]
+RIZ.PC022 <- RIZ.combined.3[,grep("PC022",colnames(RIZ.combined.3))]
+
+## write core data 
+write.csv(RIZ.GC01,"cleaneddata/combinedcoredata/RIZ.GC01.csv")
+write.csv(RIZ.GC06,"cleaneddata/combinedcoredata/RIZ.GC06.csv")
+write.csv(RIZ.PC019,"cleaneddata/combinedcoredata/RIZ.PC019.csv")
+write.csv(RIZ.PC022,"cleaneddata/combinedcoredata/RIZ.PC022.csv")
 
 
 
