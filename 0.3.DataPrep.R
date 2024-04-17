@@ -468,6 +468,31 @@ write.csv(RIZ.PC019,"cleaneddata/combinedcoredata/RIZ.PC019.csv")
 write.csv(RIZ.PC022,"cleaneddata/combinedcoredata/RIZ.PC022.csv")
 
 
+### taxonomic parsing 
+
+euk.tax <- ParseTaxonomy(pctThreshold = 99,
+                         covpct = 95,
+                         blastoutput = "taxonomy/EUK.cleaned.rawtaxonomy.txt",
+                         lineages = "taxonomy/ncbi_lineages_2024-03-04.csv.gz")
+
+mam.tax <- ParseTaxonomy(pctThreshold = 99.5,
+                         covpct = 95,
+                         blastoutput = "taxonomy/MAM.cleaned.rawtaxonomy.txt",
+                         lineages = "taxonomy/ncbi_lineages_2024-03-04.csv.gz")
+
+
+riz.tax <- ParseTaxonomy(pctThreshold = 99,
+                         covpct = 95,
+                         blastoutput = "taxonomy/RIZ.cleaned.rawtaxonomy.txt",
+                         lineages = "taxonomy/ncbi_lineages_2024-03-04.csv.gz")
+
+
+write.csv(euk.tax,"taxonomy/EUK.combined.parsed.csv")
+write.csv(riz.tax,"taxonomy/RIZ.combined.parsed.csv")
+write.csv(mam.tax,"taxonomy/MAM.combined.parsed.csv")
+
+
+
 
 
 #### CODE basement 

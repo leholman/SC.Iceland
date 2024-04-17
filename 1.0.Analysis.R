@@ -7,6 +7,7 @@
 library(vegan)
 library(RColorBrewer)
 library(breakaway)
+library("mgcv")
 
 
 ####====0.2 Functions====####
@@ -146,19 +147,30 @@ plot_with_gradient_legend <- function(values, color1, color2) {
   text(legend_x + legend_width / 2, legend_y + legend_height + 0.05 * legend_height, labels = max(values), cex = 0.8, adj = 0.5)
 }
 
+
+add.alpha <- function(col, alpha=1){
+  if(missing(col))
+    stop("Please provide a vector of colours.")
+  apply(sapply(col, col2rgb)/255, 2, 
+        function(x) 
+          rgb(x[1], x[2], x[3], alpha=alpha))  
+}
+
+
+
 ####====0.3 Data Prep====####
 ages <- read.csv("metadata/AgeOut.csv")
 ages$ID2 <- gsub("-","_",ages$ID)
 EUK.tax.PR2 <- read.csv("taxonomy/EUK.cleaned.PR2.csv",row.names = 1)
 
 ## EUK datasets
-EUK.GC1 <- read.csv("cleaneddata/combinedcodarkredata/EUK.GC01.csv",row.names = 1)
+EUK.GC1 <- read.csv("cleaneddata/combinedcoredata/EUK.GC01.csv",row.names = 1)
 EUK.GC1.nREPS <- NrepsMaker(EUK.GC1,gsub("(.*)_[0-9]$","\\1",colnames(EUK.GC1)))
 EUK.GC1.avr <- average_by_reps(EUK.GC1,gsub("(.*)_[0-9]$","\\1",colnames(EUK.GC1)))
 EUK.GC1.bin <- make_binary(EUK.GC1,1)
 EUK.GC1.ages <- ages$median[match(colnames(EUK.GC1.avr),ages$ID2)]
 
-EUK.P19 <- read.csv("cleaneddata/combinedcodarkredata/EUK.PC019.csv",row.names = 1)
+EUK.P19 <- read.csv("cleaneddata/combinedcoredata/EUK.PC019.csv",row.names = 1)
 ## make a subset of the data gettign rid of high resolution volcano samples 
 ages$ID2[184:204]
 
@@ -167,6 +179,13 @@ EUK.P19.nREPS <- NrepsMaker(EUK.P19,gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
 EUK.P19.avr <- average_by_reps(EUK.P19,gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
 EUK.P19.bin <- make_binary(EUK.P19,1)
 EUK.P19.ages <- ages$median[match(colnames(EUK.P19.avr),ages$ID2)]
+
+
+### MAM datasets
+MAM.P19 <- read.csv("cleaneddata/combinedcoredata/MAM.PC019.csv",row.names = 1)
+MAM.P19.nREPS <- NrepsMaker(MAM.P19,100,gsub("(.*)_[0-9]$","\\1",colnames(MAM.P19)))
+
+
 
 ####====1.0 Taxonomic overview====####
 
@@ -191,19 +210,6 @@ barplot(EUK.GC1.tax.c,las=2,cex.names=0.6,col=rev(getPalette(dim(EUK.GC1.tax.c)[
 legend(56,1,rev(rownames(EUK.GC1.tax.c)),fill=getPalette(dim(EUK.GC1.tax.c)[1]),cex=0.5,bty = "n",y.intersp=0.75)
 dev.off()
 
-
-## attempts here to change the spacing according to time
-ages$median[match(colnames(EUK.GC1.tax.a),ages$ID2)]
-axis(1, at=test, labels=ages$median[match(colnames(EUK.GC1.tax.a),ages$ID2)])
-
-ages$median[match(colnames(EUK.GC1.tax.a),ages$ID2)]
-positions <- c(0, diff(ages$median[match(colnames(EUK.GC1.tax.a),ages$ID2)]))
-bar_widths <- 5
-barplot(EUK.GC1.tax.a,
-        space = spaces/10,
-        width = bar_widths,
-        xlim= c(1,860))
-        #xlim = c(0, max(ages$median[match(colnames(EUK.GC1.tax.a),ages$ID2)]))*bar_widths)
 
 
 ##PC19
@@ -313,12 +319,12 @@ colSums(prop.table(as.matrix(EUK.GC1),2))
 
 
 ## GC1
-blacklist <- c("GC1_000_4","GC1_044_1","GC1_064_5","GC1_108_2","GC1_100_1","GC1_100_6","GC1_104_1","GC1_164_3","GC1_168_2","GC1_160_6","GC1_060_3","GC1_036_2","GC1_092_2","GC1_120_6",)
+blacklist <- c("GC1_000_4","GC1_044_1","GC1_064_5","GC1_108_2","GC1_100_1","GC1_100_6","GC1_104_1","GC1_164_3","GC1_168_2","GC1_160_6","GC1_060_3","GC1_036_2","GC1_092_2","GC1_120_6")
 blacklist <- c("GC1_148_1","GC1_180_7","GC1_168_2","GC1_104_1","GC1_100_6","GC1_160_6","GC1_164_3","GC1_108_2","GC1_044_1","GC1_116_1","GC1_116_2","GC1_116_3","GC1_116_4","GC1_116_5","GC1_116_6","GC1_116_7","GC1_116_8","GC1_064_5","GC1_000_4","GC1_140_1","GC1_140_2","GC1_140_3","GC1_140_4","GC1_140_5","GC1_140_6","GC1_140_7","GC1_140_8")
 
 test <- EUK.GC1[,!colnames(EUK.GC1) %in% blacklist]
-EUK.GC1.nMDS.b <- metaMDS(t(prop.table(as.matrix(test),2)),k=3,trymax = 20)
-EUK.GC1.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.GC1[,!colnames(EUK.GC1) %in% blacklist]),2)),k=3,trymax = 20)
+EUK.GC1.nMDS.b <- metaMDS(t(prop.table(as.matrix(test),2)),k=3,trymax = 200,parallel=8)
+EUK.GC1.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.GC1[,!colnames(EUK.GC1) %in% blacklist]),2)),k=3,trymax = 200,parallel=8)
 EUK.GC1.nMDS.b$points
 
 
@@ -340,11 +346,13 @@ dev.off()
 
 
 ## P19
-blacklist <- c("P19_000_4","P19_044_1","P19_064_5","P19_108_2","P19_100_1","P19_100_6","P19_104_1","P19_164_3","P19_168_2","P19_160_6","P19_060_3","P19_036_2","P19_092_2","P19_120_6")
+#blacklist <- c("P19_000_4","P19_044_1","P19_064_5","P19_108_2","P19_100_1","P19_100_6","P19_104_1","P19_164_3","P19_168_2","P19_160_6","P19_060_3","P19_036_2","P19_092_2","P19_120_6")
+#test <- EUK.P19[,!colnames(EUK.P19) %in% blacklist]
 
-test <- EUK.P19[,!colnames(EUK.P19) %in% blacklist]
-EUK.P19.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.P19.avr),2)),k=3,trymax = 20)
-EUK.P19.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.P19[,!colnames(EUK.P19) %in% blacklist]),2)),k=3,trymax = 20)
+EUK.P19.2 <- EUK.P19[colSums(EUK.P19)!=0]
+
+EUK.P19.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.P19.2),2)),k=3,trymax = 200,parallel=8)
+#EUK.P19.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.P19[,!colnames(EUK.P19) %in% blacklist]),2)),k=3,trymax = 20)
 EUK.P19.nMDS.b$points
 
 
@@ -362,4 +370,141 @@ plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points))
 plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],EUK.P19.nMDS.b$points[,2],pch=16,ylab="nMDS 2",xlab="Yr Cal BP")
 plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],EUK.P19.nMDS.b$points[,3],pch=16,ylab="nMDS 3",xlab="Yr Cal BP")
 dev.off()
+
+pdf("figures/EUK.P19.bray.nMDS.linear.short.pdf",width = 8,height = 8)
+par(mfrow=c(3,1),mar=c(5.1, 4.1, 1.1, 1.1),xpd=TRUE)
+plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],EUK.P19.nMDS.b$points[,1],pch=16,xlim=c(200,1850),ylab="nMDS 1",xlab="Yr Cal BP")
+plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],EUK.P19.nMDS.b$points[,2],pch=16,xlim=c(200,1850),ylab="nMDS 2",xlab="Yr Cal BP")
+plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],EUK.P19.nMDS.b$points[,3],pch=16,xlim=c(200,1850),ylab="nMDS 3",xlab="Yr Cal BP")
+dev.off()
+
+
+##### Example GAM 
+
+gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points))
+
+test <- tapply(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],
+       INDEX=gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),FUN=mean)
+
+example_dat  <- data.frame("example_x"=ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],
+                           "example_y"=EUK.P19.nMDS.b$points[,3])
+
+example_dat_mean  <- data.frame("example_x"=tapply(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)],INDEX=gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),FUN=mean),
+                           "example_y"=tapply(EUK.P19.nMDS.b$points[,3],INDEX=gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),FUN=mean),
+                           "example_y2"=tapply(EUK.P19.nMDS.b$points[,2],INDEX=gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),FUN=mean),
+                           "example_y3"=tapply(EUK.P19.nMDS.b$points[,1],INDEX=gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),FUN=mean))
+
+m <- gam(example_y ~ s(example_x, k = 20), data = example_dat, method = "REML")
+prediction <- data.frame("example_x"=200:3000)
+prediction <- cbind(prediction,predict(m,prediction,se.fit=TRUE))
+deriv <- gratia::derivatives(m)
+
+
+pdf("figures/EUK.GAM.all.pdf",width = 9,height = 7)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 1.1))
+
+plot(example_dat$example_x,example_dat$example_y,pch=16,ylab="nMDS 3",xlab="Cal Yr BP",col="grey",cex=0.8)
+polygon(c(prediction$example_x, rev(prediction$example_x)), c(prediction$fit+prediction$se.fit*1.96, rev(prediction$fit)+rev(prediction$se.fit*-1.96)), col=add.alpha('dodgerblue',0.5), border=NA)
+points(prediction$example_x,prediction$fit,lwd=2,col="black",type='l')
+
+
+plot(deriv$data,deriv$derivative,cex=0,ylab="Slope",xlab="Cal Yr BP")
+polygon(c(deriv$data, rev(deriv$data)), c(deriv$upper, rev(deriv$lower)), col='gray', border=NA)
+points(deriv$data,deriv$derivative,lwd=2,col="black",type='l')
+abline(h=0,lty=2)
+dev.off()
+
+
+
+m <- gam(example_y ~ s(example_x, k = 30), data = example_dat_mean, method = "REML")
+prediction <- data.frame("example_x"=200:3000)
+prediction <- cbind(prediction,predict(m,prediction,se.fit=TRUE))
+deriv <- gratia::derivatives(m)
+
+m2 <- gam(example_y2 ~ s(example_x, k = 30), data = example_dat_mean, method = "REML")
+prediction2 <- data.frame("example_x"=200:3000)
+prediction2 <- cbind(prediction2,predict(m2,prediction2,se.fit=TRUE))
+deriv2 <- gratia::derivatives(m2)
+
+
+m3 <- gam(example_y3 ~ s(example_x, k = 30), data = example_dat_mean, method = "REML")
+prediction3 <- data.frame("example_x"=200:3000)
+prediction3 <- cbind(prediction3,predict(m3,prediction3,se.fit=TRUE))
+deriv3 <- gratia::derivatives(m3)
+
+
+
+pdf("figures/EUK.GAM.avr.pdf",width = 9,height = 7)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 1.1))
+
+plot(example_dat_mean$example_x,example_dat_mean$example_y,pch=16,ylab="nMDS 3",xlab="Cal Yr BP",col="grey",cex=0.8)
+polygon(c(prediction$example_x, rev(prediction$example_x)), c(prediction$fit+prediction$se.fit*1.96, rev(prediction$fit)+rev(prediction$se.fit*-1.96)), col=add.alpha('dodgerblue',0.5), border=NA)
+points(prediction$example_x,prediction$fit,lwd=2,col="black",type='l')
+
+
+plot(deriv$data,deriv$derivative,cex=0,ylab="Slope",xlab="Cal Yr BP")
+polygon(c(deriv$data, rev(deriv$data)), c(deriv$upper, rev(deriv$lower)), col='gray', border=NA)
+points(deriv$data,deriv$derivative,lwd=2,col="black",type='l')
+abline(h=0,lty=2)
+dev.off()
+
+
+# all three nMDSs
+
+m1 <- gam(example_y3 ~ s(example_x, k = 30), data = example_dat_mean, method = "REML")
+prediction <- data.frame("example_x"=200:3000)
+prediction <- cbind(prediction,predict(m1,prediction,se.fit=TRUE))
+deriv <- gratia::derivatives(m1)
+
+m2 <- gam(example_y2 ~ s(example_x, k = 30), data = example_dat_mean, method = "REML")
+prediction2 <- data.frame("example_x"=200:3000)
+prediction2 <- cbind(prediction2,predict(m2,prediction2,se.fit=TRUE))
+deriv2 <- gratia::derivatives(m2)
+
+
+m3 <- gam(example_y ~ s(example_x, k = 30), data = example_dat_mean, method = "REML")
+prediction3 <- data.frame("example_x"=200:3000)
+prediction3 <- cbind(prediction3,predict(m3,prediction3,se.fit=TRUE))
+deriv3 <- gratia::derivatives(m3)
+
+
+pdf("figures/EUK.GAM.slopeall.pdf",width = 9,heigh=6)
+plot(deriv$data,deriv$derivative,lwd=2,col="dodgerblue",type='l',xlab="Cal Yr BP",ylab="Slope of GAM modelled component")
+points(deriv2$data,deriv2$derivative,lwd=2,col="red",type='l')
+points(deriv3$data,deriv3$derivative,lwd=2,col="darkgreen",type='l')
+
+
+polygon(c(deriv$data, rev(deriv$data)), c(deriv$upper, rev(deriv$lower)), col=add.alpha('grey',0.3), border=NA)
+polygon(c(deriv2$data, rev(deriv2$data)), c(deriv2$upper, rev(deriv2$lower)),col=add.alpha('grey',0.3), border=NA)
+polygon(c(deriv3$data, rev(deriv3$data)), c(deriv3$upper, rev(deriv3$lower)), col=add.alpha('grey',0.3), border=NA)
+
+dev.off()
+
+
+### whale biz
+pdf("figures/RIZ.ASV2.pdf",width = 6,height = 6)
+plot(ages$median[match(colnames(MAM.P19.nREPS[2,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[2,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+dev.off()
+
+pdf("figures/RIZ.ASV3.pdf",width = 6,height = 6)
+plot(ages$median[match(colnames(MAM.P19.nREPS[3,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[3,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+dev.off()
+
+pdf("figures/RIZ.ASV25.pdf",width = 6,height = 6)
+plot(ages$median[match(colnames(MAM.P19.nREPS[25,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[4,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+dev.off()
+
+
+## whale GLM
+
+year <- ages$median[match(colnames(MAM.P19.nREPS[3,]),ages$ID2)]
+detections <- as.numeric(MAM.P19.nREPS[3,])
+
+test <- glm(detections ~year,poisson(link = "log"))
+summary(test)
+
+prediction <- data.frame("year"=200:3000)
+prediction <- cbind(prediction,predict(test,prediction,se.fit=TRUE))
+plot(prediction$year,prediction$fit)
+
 

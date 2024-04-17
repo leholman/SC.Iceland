@@ -8,7 +8,7 @@ library(ggspatial)
 
 ##
 raw.metadata <- read.csv("metadata/CoreMetaData.csv")
-metadata <- raw.metadata[raw.metadata$CoreID!="GC06",]
+metadata <- raw.metadata[raw.metadata$CoreID!="GC06"&raw.metadata$CoreID!="PC022",]
 
 
 basemap(limits = c(-25, -12, 63, 67), bathymetry = TRUE)
@@ -19,13 +19,27 @@ limits = c(-25, -12, 63, 67)
 pdf("Maps/OverviewV1.pdf",height = 6,width = 9)
 basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE)+
   #basemap(limits = c(-25, -12, 63, 67),rotate = TRUE)+
-    ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = "red",crs = 4326)+
-  #ggspatial::geom_spatial_text(aes(x = Lon, y = Lat+0.04,label=CoreID),data = metadata, color = "darkred",cex=2)+
+    ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("black"),crs = 4326,cex=2.5)+
+    ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("dodgerblue","darkred"),crs = 4326,cex=2)+
+    ggspatial::geom_spatial_text(aes(x = Lon, y = Lat+0.1,label=CoreID),data = metadata,cex=2)+
   xlab("Longitude")+
   ylab("Latitude")+
   annotation_scale(location = "bl")+ 
   annotation_north_arrow(location = "tr", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
 dev.off()
+
+pdf("Maps/OverviewV1mini.pdf",height = 2.5,width = 4.5)
+basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE,legends = FALSE)+
+  #basemap(limits = c(-25, -12, 63, 67),rotate = TRUE)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("black"),crs = 4326,cex=4.5)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("dodgerblue","darkred"),crs = 4326,cex=4)+
+  ggspatial::geom_spatial_text(aes(x = Lon, y = Lat+0.3,label=CoreID),data = metadata,cex=3)+
+  xlab("")+
+  ylab("")
+  #annotation_scale(location = "bl")+ 
+  #annotation_north_arrow(location = "tr", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
+dev.off()
+
 
 
 basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE)+

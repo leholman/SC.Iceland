@@ -27,6 +27,6 @@ for i in script.* ;  do  sbatch $i;done
 
 #combine output from all the split files to form one mega taxonomy file
 cd ../results
-cat EUK* > EUK.LN1.dada2.raw.taxonomy.txt
-cat RIZ* > RIZ.LN1.dada2.raw.taxonomy.txt
-cat MAM* > MAM.LN1.dada2.raw.taxonomy.txt
+cat EUK* > EUK.cleaned.rawtaxonomy.txt
+cat RIZ* > RIZ.cleaned.rawtaxonomy.txt
+cat MAM* > MAM.cleaned.rawtaxonomy.txt
