@@ -54,18 +54,25 @@ CountTable <- function(in.taxonomy,in.data,output="Count",some.unassigned=T){
     output=="Abundance"){return(out.dat.abundance)}
 }
 
-minAbundance <- function(inputtable=NA,minAbun= 0.01){
-  inputtable <- rbind(inputtable,rep(0, ncol(inputtable)))
-  rownames(inputtable)[dim(inputtable)[1]] <- "Others"
-  for (row in 1:dim(inputtable)[2]){
-    min <- sum(inputtable[,row])*minAbun
-    others <- sum(inputtable[inputtable[,row]<min,row])
-    inputtable[inputtable[,row]<min,row] <- 0
-    inputtable["Others",row] <- others
-    inputtable <- inputtable[rowSums(inputtable)>1,]
+minAbundance <- function(inputtable = NA, minAbun = 0.01) {
+  others <- rep(0, ncol(inputtable))
+  
+  for (col in 1:ncol(inputtable)) {
+    threshold = sum(inputtable[, col]) * minAbun
+    below_threshold_indices = inputtable[, col] < threshold
+    others[col] = sum(inputtable[below_threshold_indices, col])
+    inputtable[below_threshold_indices, col] = 0
   }
+  
+  inputtable <- rbind(inputtable, others)
+  rownames(inputtable)[nrow(inputtable)] = "Others"
+  
+  # Remove rows that sum to zero
+  inputtable <- inputtable[rowSums(inputtable) != 0, ]
+  
   return(inputtable)
 }
+
 
 make_binary <- function (df,threshold){
   df <- sapply(df, function(x) ifelse(is.numeric(x) & x < threshold, 0, 1))
@@ -166,7 +173,7 @@ EUK.tax.PR2 <- read.csv("taxonomy/EUK.cleaned.PR2.csv",row.names = 1)
 ## EUK datasets
 EUK.GC1 <- read.csv("cleaneddata/combinedcoredata/EUK.GC01.csv",row.names = 1)
 EUK.GC1.nREPS <- NrepsMaker(EUK.GC1,gsub("(.*)_[0-9]$","\\1",colnames(EUK.GC1)))
-EUK.GC1.avr <- average_by_reps(EUK.GC1,gsub("(.*)_[0-9]$","\\1",colnames(EUK.GC1)))
+EUK.GC1.avr <- average_by_reps(prop.table(as.matrix(EUK.GC1),2),gsub("(.*)_[0-9]$","\\1",colnames(EUK.GC1)))
 EUK.GC1.bin <- make_binary(EUK.GC1,1)
 EUK.GC1.ages <- ages$median[match(colnames(EUK.GC1.avr),ages$ID2)]
 
@@ -176,14 +183,21 @@ ages$ID2[184:204]
 
 
 EUK.P19.nREPS <- NrepsMaker(EUK.P19,gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
-EUK.P19.avr <- average_by_reps(EUK.P19,gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
+EUK.P19.avr <- average_by_reps(prop.table(as.matrix(EUK.P19),2),gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
 EUK.P19.bin <- make_binary(EUK.P19,1)
 EUK.P19.ages <- ages$median[match(colnames(EUK.P19.avr),ages$ID2)]
 
 
 ### MAM datasets
 MAM.P19 <- read.csv("cleaneddata/combinedcoredata/MAM.PC019.csv",row.names = 1)
-MAM.P19.nREPS <- NrepsMaker(MAM.P19,100,gsub("(.*)_[0-9]$","\\1",colnames(MAM.P19)))
+MAM.P19.nREPS <- NrepsMaker(MAM.P19,gsub("(.*)_[0-9]$","\\1",colnames(MAM.P19)))
+
+
+### RIZ datasets
+RIZ.P19 <- read.csv("cleaneddata/combinedcoredata/RIZ.PC019.csv",row.names = 1)
+RIZ.P19.nREPS <- NrepsMaker(RIZ.P19,gsub("(.*)_[0-9]$","\\1",colnames(RIZ.P19)))
+
+
 
 
 
@@ -271,6 +285,32 @@ plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",names(EUK.GC1)),ages$ID2)],
      xlab="Cal yr BP",
      ylab="ASV Richness")
 
+## with GAM
+
+GC1.rich.gam.dat  <- data.frame("year"=ages$median[match(names(EUK.GC1.mean.rich),ages$ID2)],
+                           "richness"=EUK.GC1.mean.rich)
+
+m <- gam(richness ~ s(year, k = 20), data = GC1.rich.gam.dat, method = "REML")
+prediction <- data.frame("year"=280:3600)
+prediction <- cbind(prediction,predict(m,prediction,se.fit=TRUE))
+deriv <- gratia::derivatives(m)
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+
+pdf("figures/EUK.GC1.richness.gam.pdf",width = 9,height = 4.5)
+par(mar=c(5.1, 4.1, 1.1, 1.1))
+plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.GC1)),ages$ID2)],
+     colSums(make_binary(EUK.GC1,2)),
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+      col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction$year,prediction$fit,lwd=5,col="black",type='l')
+dev.off()
+
+
 ## P19
 ## calc raw richness 
 EUK.P19.raw.richness <- colSums(make_binary(EUK.P19,2))
@@ -313,9 +353,39 @@ plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",names(EUK.P19)),ages$ID2)],
      ylab="ASV Richness")
 
 
+
+## with GAM
+
+P19.rich.gam.dat  <- data.frame("year"=ages$median[match(names(EUK.P19.mean.rich),ages$ID2)],
+                                "richness"=EUK.P19.mean.rich)
+
+m <- gam(richness ~ s(year, k = 20), data = P19.rich.gam.dat, method = "REML")
+prediction <- data.frame("year"=200:3100)
+prediction <- cbind(prediction,predict(m,prediction,se.fit=TRUE))
+deriv <- gratia::derivatives(m)
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+
+pdf("figures/EUK.P19.richness.gam.pdf",width = 9,height = 4.5)
+par(mar=c(5.1, 4.1, 1.1, 1.1))
+plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)),ages$ID2)],
+     colSums(make_binary(EUK.P19,2)),
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey",
+     ylim=c(500,1500))
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction$year,prediction$fit,lwd=5,col="black",type='l')
+dev.off()
+
+
+
+
 ####====3.0 Beta diversity ====####
 
-colSums(prop.table(as.matrix(EUK.GC1),2))
+## first lets identify outliers
 
 
 ## GC1
@@ -323,9 +393,15 @@ blacklist <- c("GC1_000_4","GC1_044_1","GC1_064_5","GC1_108_2","GC1_100_1","GC1_
 blacklist <- c("GC1_148_1","GC1_180_7","GC1_168_2","GC1_104_1","GC1_100_6","GC1_160_6","GC1_164_3","GC1_108_2","GC1_044_1","GC1_116_1","GC1_116_2","GC1_116_3","GC1_116_4","GC1_116_5","GC1_116_6","GC1_116_7","GC1_116_8","GC1_064_5","GC1_000_4","GC1_140_1","GC1_140_2","GC1_140_3","GC1_140_4","GC1_140_5","GC1_140_6","GC1_140_7","GC1_140_8")
 
 test <- EUK.GC1[,!colnames(EUK.GC1) %in% blacklist]
+test <- EUK.GC1
 EUK.GC1.nMDS.b <- metaMDS(t(prop.table(as.matrix(test),2)),k=3,trymax = 200,parallel=8)
 EUK.GC1.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.GC1[,!colnames(EUK.GC1) %in% blacklist]),2)),k=3,trymax = 200,parallel=8)
-EUK.GC1.nMDS.b$points
+
+## here we use the average dataset 
+EUK.GC1.MDS.b <- wcmdscale(vegdist(t(EUK.GC1.avr[,!colnames(EUK.GC1.avr) %in% c("GC1_116","GC1_140")])),eig = TRUE)
+EUK.GC1.MDS.j <- wcmdscale(vegdist(t(EUK.GC1.avr[,!colnames(EUK.GC1.avr) %in% c("GC1_116","GC1_140")]),method = "jac",binary=TRUE),eig = TRUE)
+
+
 
 
 pdf("figures/EUK.GC1.bray.nMDS.pdf",width = 9,height = 3.5)
@@ -345,6 +421,116 @@ dev.off()
 
 
 
+## Lets make some GAMS
+
+GC1.MDS.b.gam.dat  <- data.frame("year"=ages$median[match(rownames(EUK.GC1.MDS.b$points),ages$ID2)],
+                                "MDS1"=EUK.GC1.MDS.b$points[,1],
+                                "MDS2"=EUK.GC1.MDS.b$points[,2],
+                                "MDS3"=EUK.GC1.MDS.b$points[,3],
+                                "MDS4"=EUK.GC1.MDS.b$points[,4])
+
+m1 <- gam(MDS1 ~ s(year), data = GC1.MDS.b.gam.dat, method = "REML")
+m2 <- gam(MDS2 ~ s(year, k = 20), data = GC1.MDS.b.gam.dat, method = "REML")
+m3 <- gam(MDS3 ~ s(year, k = 20), data = GC1.MDS.b.gam.dat, method = "REML")
+m4 <- gam(MDS4 ~ s(year, k = 20), data = GC1.MDS.b.gam.dat, method = "REML")
+
+prediction <- data.frame("year"=280:3600)
+prediction1 <- cbind(prediction,predict(m1,prediction,se.fit=TRUE))
+prediction2 <- cbind(prediction,predict(m2,prediction,se.fit=TRUE))
+prediction3 <- cbind(prediction,predict(m3,prediction,se.fit=TRUE))
+prediction4 <- cbind(prediction,predict(m4,prediction,se.fit=TRUE))
+prediction1$uppCI <- prediction1$fit+prediction1$se.fit*1.96
+prediction1$lwrCI <- prediction1$fit-prediction1$se.fit*1.96
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction3$uppCI <- prediction3$fit+prediction3$se.fit*1.96
+prediction3$lwrCI <- prediction3$fit-prediction3$se.fit*1.96
+prediction4$uppCI <- prediction4$fit+prediction4$se.fit*1.96
+prediction4$lwrCI <- prediction4$fit-prediction4$se.fit*1.96
+
+deriv <- gratia::derivatives(m)
+
+
+## plot
+
+
+
+pdf("figures/EUK.GC1.bray.MDS.linear.pdf",width = 8,height = 8)
+par(mfrow=c(4,1),mar=c(2, 4.1, 1.1, 1.1))
+plot(ages$median[match(rownames(EUK.GC1.MDS.b$points),ages$ID2)],EUK.GC1.MDS.b$points[,1],pch=16,ylab="MDS 1",xlab="Yr Cal BP")
+polygon(c(prediction1$year, rev(prediction1$year)), c(prediction1$uppCI, rev(prediction1$lwrCI)), col=add.alpha('dodgerblue',0.3), border=NA)
+points(prediction1$year,prediction1$fit,lwd=2,col="dodgerblue",type='l')
+plot(ages$median[match(rownames(EUK.GC1.MDS.b$points),ages$ID2)],EUK.GC1.MDS.b$points[,2],pch=16,ylab="MDS 2",xlab="Yr Cal BP")
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('pink3',0.3), border=NA)
+points(prediction2$year,prediction2$fit,lwd=2,col="pink3",type='l')
+plot(ages$median[match(rownames(EUK.GC1.MDS.b$points),ages$ID2)],EUK.GC1.MDS.b$points[,3],pch=16,ylab="MDS 3",xlab="Yr Cal BP")
+polygon(c(prediction3$year, rev(prediction3$year)), c(prediction3$uppCI, rev(prediction3$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
+points(prediction3$year,prediction3$fit,lwd=2,col="darkgreen",type='l')
+plot(ages$median[match(rownames(EUK.GC1.MDS.b$points),ages$ID2)],EUK.GC1.MDS.b$points[,4],pch=16,ylab="MDS 4",xlab="Yr Cal BP")
+polygon(c(prediction4$year, rev(prediction4$year)), c(prediction4$uppCI, rev(prediction4$lwrCI)), col=add.alpha('gold',0.3), border=NA)
+points(prediction4$year,prediction4$fit,lwd=2,col="gold",type='l')
+dev.off()
+
+
+
+#GAMS
+GC1.MDS.j.gam.dat  <- data.frame("year"=ages$median[match(rownames(EUK.GC1.MDS.j$points),ages$ID2)],
+                                 "MDS1"=EUK.GC1.MDS.j$points[,1],
+                                 "MDS2"=EUK.GC1.MDS.j$points[,2],
+                                 "MDS3"=EUK.GC1.MDS.j$points[,3],
+                                 "MDS4"=EUK.GC1.MDS.j$points[,4])
+
+m1 <- gam(MDS1 ~ s(year, k = 20), data = GC1.MDS.j.gam.dat, method = "REML")
+m2 <- gam(MDS2 ~ s(year, k = 20), data = GC1.MDS.j.gam.dat, method = "REML")
+m3 <- gam(MDS3 ~ s(year, k = 20), data = GC1.MDS.j.gam.dat, method = "REML")
+m4 <- gam(MDS4 ~ s(year, k = 20), data = GC1.MDS.j.gam.dat, method = "REML")
+
+prediction <- data.frame("year"=280:3600)
+prediction1 <- cbind(prediction,predict(m1,prediction,se.fit=TRUE))
+prediction2 <- cbind(prediction,predict(m2,prediction,se.fit=TRUE))
+prediction3 <- cbind(prediction,predict(m3,prediction,se.fit=TRUE))
+prediction4 <- cbind(prediction,predict(m4,prediction,se.fit=TRUE))
+prediction1$uppCI <- prediction1$fit+prediction1$se.fit*1.96
+prediction1$lwrCI <- prediction1$fit-prediction1$se.fit*1.96
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction3$uppCI <- prediction3$fit+prediction3$se.fit*1.96
+prediction3$lwrCI <- prediction3$fit-prediction3$se.fit*1.96
+prediction4$uppCI <- prediction4$fit+prediction4$se.fit*1.96
+prediction4$lwrCI <- prediction4$fit-prediction4$se.fit*1.96
+
+pdf("figures/EUK.GC1.jacc.MDS.linear.pdf",width = 8,height = 8)
+par(mfrow=c(4,1),mar=c(2, 4.1, 1.1, 1.1))
+plot(ages$median[match(rownames(EUK.GC1.MDS.j$points),ages$ID2)],EUK.GC1.MDS.j$points[,1],pch=16,ylab="MDS 1",xlab="Yr Cal BP")
+polygon(c(prediction1$year, rev(prediction1$year)), c(prediction1$uppCI, rev(prediction1$lwrCI)), col=add.alpha('dodgerblue',0.3), border=NA)
+points(prediction1$year,prediction1$fit,lwd=2,col="dodgerblue",type='l')
+plot(ages$median[match(rownames(EUK.GC1.MDS.j$points),ages$ID2)],EUK.GC1.MDS.j$points[,2],pch=16,ylab="MDS 2",xlab="Yr Cal BP")
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('pink3',0.3), border=NA)
+points(prediction2$year,prediction2$fit,lwd=2,col="pink3",type='l')
+plot(ages$median[match(rownames(EUK.GC1.MDS.j$points),ages$ID2)],EUK.GC1.MDS.j$points[,3],pch=16,ylab="MDS 3",xlab="Yr Cal BP")
+polygon(c(prediction3$year, rev(prediction3$year)), c(prediction3$uppCI, rev(prediction3$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
+points(prediction3$year,prediction3$fit,lwd=2,col="darkgreen",type='l')
+plot(ages$median[match(rownames(EUK.GC1.MDS.j$points),ages$ID2)],EUK.GC1.MDS.j$points[,4],pch=16,ylab="MDS 4",xlab="Yr Cal BP")
+polygon(c(prediction4$year, rev(prediction4$year)), c(prediction4$uppCI, rev(prediction4$lwrCI)), col=add.alpha('gold',0.3), border=NA)
+points(prediction4$year,prediction4$fit,lwd=2,col="gold",type='l')
+dev.off()
+
+
+
+pdf("figures/EUK.GC1.bray.MDS.linear.prop.pdf",width = 5,height = 4)
+par(mar=c(1, 3.1, 1.1, 1.1))
+barplot(round((EUK.GC1.MDS.b$eig[EUK.GC1.MDS.b$eig>0]/sum(EUK.GC1.MDS.b$eig[EUK.GC1.MDS.b$eig>0]))*100,1),col=c("dodgerblue","pink3","darkgreen","gold",rep("grey",length(EUK.GC1.MDS.b$eig)-4)))
+dev.off()
+pdf("figures/EUK.GC1.jacc.MDS.linear.prop.pdf",width = 5,height = 4)
+par(mar=c(1, 3.1, 1.1, 1.1))
+barplot(round((EUK.GC1.MDS.j$eig[EUK.GC1.MDS.j$eig>0]/sum(EUK.GC1.MDS.j$eig[EUK.GC1.MDS.j$eig>0]))*100,1),col=c("dodgerblue","pink3","darkgreen","gold",rep("grey",length(EUK.GC1.MDS.j$eig)-4)))
+dev.off()
+
+
+
+
+
+
 ## P19
 #blacklist <- c("P19_000_4","P19_044_1","P19_064_5","P19_108_2","P19_100_1","P19_100_6","P19_104_1","P19_164_3","P19_168_2","P19_160_6","P19_060_3","P19_036_2","P19_092_2","P19_120_6")
 #test <- EUK.P19[,!colnames(EUK.P19) %in% blacklist]
@@ -354,6 +540,13 @@ EUK.P19.2 <- EUK.P19[colSums(EUK.P19)!=0]
 EUK.P19.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.P19.2),2)),k=3,trymax = 200,parallel=8)
 #EUK.P19.nMDS.b <- metaMDS(t(prop.table(as.matrix(EUK.P19[,!colnames(EUK.P19) %in% blacklist]),2)),k=3,trymax = 20)
 EUK.P19.nMDS.b$points
+
+## here we use the average dataset 
+EUK.P19.MDS.b <- wcmdscale(vegdist(t(EUK.P19.avr)),eig = TRUE)
+EUK.P19.MDS.j <- wcmdscale(vegdist(t(EUK.P19.avr),method = "jac",binary=TRUE),eig = TRUE)
+
+
+
 
 
 pdf("figures/EUK.P19.bray.nMDS.pdf",width = 9,height = 3.5)
@@ -480,8 +673,150 @@ polygon(c(deriv3$data, rev(deriv3$data)), c(deriv3$upper, rev(deriv3$lower)), co
 
 dev.off()
 
+## new stuff
+
+
+
+## Lets make some GAMS
+
+P19.MDS.b.gam.dat  <- data.frame("year"=ages$median[match(rownames(EUK.P19.MDS.b$points),ages$ID2)],
+                                 "MDS1"=EUK.P19.MDS.b$points[,1],
+                                 "MDS2"=EUK.P19.MDS.b$points[,2],
+                                 "MDS3"=EUK.P19.MDS.b$points[,3],
+                                 "MDS4"=EUK.P19.MDS.b$points[,4])
+
+m1 <- gam(MDS1 ~ s(year,k=20), data = P19.MDS.b.gam.dat, method = "REML")
+m2 <- gam(MDS2 ~ s(year, k = 20), data = P19.MDS.b.gam.dat, method = "REML")
+m3 <- gam(MDS3 ~ s(year, k = 20), data = P19.MDS.b.gam.dat, method = "REML")
+m4 <- gam(MDS4 ~ s(year, k = 20), data = P19.MDS.b.gam.dat, method = "REML")
+
+prediction <- data.frame("year"=240:3100)
+prediction1 <- cbind(prediction,predict(m1,prediction,se.fit=TRUE))
+prediction2 <- cbind(prediction,predict(m2,prediction,se.fit=TRUE))
+prediction3 <- cbind(prediction,predict(m3,prediction,se.fit=TRUE))
+prediction4 <- cbind(prediction,predict(m4,prediction,se.fit=TRUE))
+prediction1$uppCI <- prediction1$fit+prediction1$se.fit*1.96
+prediction1$lwrCI <- prediction1$fit-prediction1$se.fit*1.96
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction3$uppCI <- prediction3$fit+prediction3$se.fit*1.96
+prediction3$lwrCI <- prediction3$fit-prediction3$se.fit*1.96
+prediction4$uppCI <- prediction4$fit+prediction4$se.fit*1.96
+prediction4$lwrCI <- prediction4$fit-prediction4$se.fit*1.96
+
+
+
+## plot
+
+
+
+pdf("figures/EUK.P19.bray.MDS.linear.pdf",width = 8,height = 8)
+par(mfrow=c(4,1),mar=c(2, 4.1, 1.1, 1.1))
+plot(ages$median[match(rownames(EUK.P19.MDS.b$points),ages$ID2)],EUK.P19.MDS.b$points[,1],pch=16,ylab="MDS 1",xlab="Yr Cal BP")
+polygon(c(prediction1$year, rev(prediction1$year)), c(prediction1$uppCI, rev(prediction1$lwrCI)), col=add.alpha('dodgerblue',0.3), border=NA)
+points(prediction1$year,prediction1$fit,lwd=2,col="dodgerblue",type='l')
+plot(ages$median[match(rownames(EUK.P19.MDS.b$points),ages$ID2)],EUK.P19.MDS.b$points[,2],pch=16,ylab="MDS 2",xlab="Yr Cal BP")
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('pink3',0.3), border=NA)
+points(prediction2$year,prediction2$fit,lwd=2,col="pink3",type='l')
+plot(ages$median[match(rownames(EUK.P19.MDS.b$points),ages$ID2)],EUK.P19.MDS.b$points[,3],pch=16,ylab="MDS 3",xlab="Yr Cal BP")
+polygon(c(prediction3$year, rev(prediction3$year)), c(prediction3$uppCI, rev(prediction3$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
+points(prediction3$year,prediction3$fit,lwd=2,col="darkgreen",type='l')
+plot(ages$median[match(rownames(EUK.P19.MDS.b$points),ages$ID2)],EUK.P19.MDS.b$points[,4],pch=16,ylab="MDS 4",xlab="Yr Cal BP")
+polygon(c(prediction4$year, rev(prediction4$year)), c(prediction4$uppCI, rev(prediction4$lwrCI)), col=add.alpha('gold',0.3), border=NA)
+points(prediction4$year,prediction4$fit,lwd=2,col="gold",type='l')
+dev.off()
+
+##
+
+
+
+## Lets make some GAMS
+
+P19.MDS.j.gam.dat  <- data.frame("year"=ages$median[match(rownames(EUK.P19.MDS.j$points),ages$ID2)],
+                                 "MDS1"=EUK.P19.MDS.j$points[,1],
+                                 "MDS2"=EUK.P19.MDS.j$points[,2],
+                                 "MDS3"=EUK.P19.MDS.j$points[,3],
+                                 "MDS4"=EUK.P19.MDS.j$points[,4])
+
+m1 <- gam(MDS1 ~ s(year,k=20), data = P19.MDS.j.gam.dat, method = "REML")
+m2 <- gam(MDS2 ~ s(year, k = 20), data = P19.MDS.j.gam.dat, method = "REML")
+m3 <- gam(MDS3 ~ s(year, k = 20), data = P19.MDS.j.gam.dat, method = "REML")
+m4 <- gam(MDS4 ~ s(year, k = 20), data = P19.MDS.j.gam.dat, method = "REML")
+
+prediction <- data.frame("year"=240:3100)
+prediction1 <- cbind(prediction,predict(m1,prediction,se.fit=TRUE))
+prediction2 <- cbind(prediction,predict(m2,prediction,se.fit=TRUE))
+prediction3 <- cbind(prediction,predict(m3,prediction,se.fit=TRUE))
+prediction4 <- cbind(prediction,predict(m4,prediction,se.fit=TRUE))
+prediction1$uppCI <- prediction1$fit+prediction1$se.fit*1.96
+prediction1$lwrCI <- prediction1$fit-prediction1$se.fit*1.96
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction3$uppCI <- prediction3$fit+prediction3$se.fit*1.96
+prediction3$lwrCI <- prediction3$fit-prediction3$se.fit*1.96
+prediction4$uppCI <- prediction4$fit+prediction4$se.fit*1.96
+prediction4$lwrCI <- prediction4$fit-prediction4$se.fit*1.96
+
+
+
+## plot
+
+
+
+pdf("figures/EUK.P19.jacc.MDS.linear.pdf",width = 8,height = 8)
+par(mfrow=c(4,1),mar=c(2, 4.1, 1.1, 1.1))
+plot(ages$median[match(rownames(EUK.P19.MDS.j$points),ages$ID2)],EUK.P19.MDS.j$points[,1],pch=16,ylab="MDS 1",xlab="Yr Cal BP")
+polygon(c(prediction1$year, rev(prediction1$year)), c(prediction1$uppCI, rev(prediction1$lwrCI)), col=add.alpha('dodgerblue',0.3), border=NA)
+points(prediction1$year,prediction1$fit,lwd=2,col="dodgerblue",type='l')
+plot(ages$median[match(rownames(EUK.P19.MDS.j$points),ages$ID2)],EUK.P19.MDS.j$points[,2],pch=16,ylab="MDS 2",xlab="Yr Cal BP")
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('pink3',0.3), border=NA)
+points(prediction2$year,prediction2$fit,lwd=2,col="pink3",type='l')
+plot(ages$median[match(rownames(EUK.P19.MDS.j$points),ages$ID2)],EUK.P19.MDS.j$points[,3],pch=16,ylab="MDS 3",xlab="Yr Cal BP")
+polygon(c(prediction3$year, rev(prediction3$year)), c(prediction3$uppCI, rev(prediction3$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
+points(prediction3$year,prediction3$fit,lwd=2,col="darkgreen",type='l')
+plot(ages$median[match(rownames(EUK.P19.MDS.j$points),ages$ID2)],EUK.P19.MDS.j$points[,4],pch=16,ylab="MDS 4",xlab="Yr Cal BP")
+polygon(c(prediction4$year, rev(prediction4$year)), c(prediction4$uppCI, rev(prediction4$lwrCI)), col=add.alpha('gold',0.3), border=NA)
+points(prediction4$year,prediction4$fit,lwd=2,col="gold",type='l')
+dev.off()
+
+
+
+pdf("figures/EUK.P19.bray.MDS.linear.prop.pdf",width = 5,height = 4)
+par(mar=c(1, 3.1, 1.1, 1.1))
+barplot(round((EUK.P19.MDS.b$eig[EUK.P19.MDS.b$eig>0]/sum(EUK.P19.MDS.b$eig[EUK.P19.MDS.b$eig>0]))*100,1),col=c("dodgerblue","pink3","darkgreen","gold",rep("grey",length(EUK.P19.MDS.b$eig)-4)))
+dev.off()
+pdf("figures/EUK.P19.jacc.MDS.linear.prop.pdf",width = 5,height = 4)
+par(mar=c(1, 3.1, 1.1, 1.1))
+barplot(round((EUK.P19.MDS.j$eig[EUK.P19.MDS.j$eig>0]/sum(EUK.P19.MDS.j$eig[EUK.P19.MDS.j$eig>0]))*100,1),col=c("dodgerblue","pink3","darkgreen","gold",rep("grey",length(EUK.P19.MDS.j$eig)-4)))
+dev.off()
+
+## little connecting thing
+dates <-sort(unique(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)),ages$ID2)]))
+
+for (i in 1:length(dates)) {
+  # Coordinates for the top plot (linear)
+  top_x <- i
+  top_y <- par("usr")[3]
+  
+  # Coordinates for the bottom plot (dates)
+  bottom_x <- i
+  bottom_y <- par("usr")[4]
+  
+  # Draw the line
+  segments(top_x, top_y, bottom_x, bottom_y, col = 'gray')
+}
+
+
+
+
 
 ### whale biz
+
+plot(ages$median[match(colnames(MAM.P19.nREPS[245,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[245,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+
+plot(ages$median[match(colnames(RIZ.P19.nREPS[3,]),ages$ID2)],jitter(as.numeric(RIZ.P19.nREPS[43,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+
+
 pdf("figures/RIZ.ASV2.pdf",width = 6,height = 6)
 plot(ages$median[match(colnames(MAM.P19.nREPS[2,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[2,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 dev.off()
