@@ -1,7 +1,8 @@
 ## Climate code
 
 library("mgcv")
-
+library("dplR")
+library("zoo")
 # some functions
 
 add.alpha <- function(col, alpha=1){
@@ -17,8 +18,8 @@ add.alpha <- function(col, alpha=1){
 
 
 climate <- read.csv("rawdata/climate/combined.csv")
-
-
+sampledates <- read.csv("metadata/AgeOut.csv")
+climatedat <- data.frame("Sample"=sampledates$ID,"Core"=sampledates$Core,"Date_bp_mean"=sampledates$mean,"Date_CE_mean"=1950-sampledates$mean)
 unique(climate$record)
 
 
@@ -32,6 +33,10 @@ climate$record==subset
 value <- climate$value[climate$record==subset]
 year <- climate$year[climate$record==subset]
 
+valueSpline <- detrend.series(value,nyrs = 100,return.info=TRUE)
+plot(year,value,col="grey")
+points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
+
 gam1 <- gam(value ~ s(year,k=50), method = "REML")
 plot(gam1)
 
@@ -40,6 +45,17 @@ prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
+prediction2 <- data.frame("year"=climatedat$Date_CE_mean)
+prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
+prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+prediction2$lowrezspline <- valueSpline$curves$Spline[match(prediction2$year,year)]
+
+prediction$fit
+points(year,prediction$fit,type="l")
+
 pdf("figures/climate/Artica_d13C.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="YearCE",
@@ -47,7 +63,12 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      col="grey30")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=3,col="darkgreen",type='l')
+points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
 dev.off()
+
+colnames(prediction2) <- c("year","d13C.GAM.fit","d13C.GAM.fit.se","d13C.GAM.fit.uppCI","d13C.GAM.fit.lwrCI","d13C.100yrspline")
+climatedat <- cbind(climatedat,prediction2)
+
 
 ## delta 18O
 
@@ -57,6 +78,10 @@ climate$record==subset
 value <- climate$value[climate$record==subset]
 year <- climate$year[climate$record==subset]
 
+valueSpline <- detrend.series(value,nyrs = 100,return.info=TRUE)
+plot(year,value,col="grey")
+points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
+
 
 gam1 <- gam(value ~ s(year,k=50), method = "REML")
 plot(gam1)
@@ -66,6 +91,16 @@ prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
+
+prediction2 <- data.frame("year"=climatedat$Date_CE_mean)
+prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
+prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+prediction2$lowrezspline <- valueSpline$curves$Spline[match(prediction2$year,year)]
+
+
 pdf("figures/climate/Artica_d18O.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="YearCE",
@@ -73,7 +108,12 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      col="grey30")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=3,col="darkgreen",type='l')
+points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
 dev.off()
+
+colnames(prediction2) <- c("year","d18O.GAM.fit","d18O.GAM.fit.se","d18O.GAM.fit.uppCI","d18O.GAM.fit.lwrCI","d18O.100yrspline")
+climatedat <- cbind(climatedat,prediction2)
+
 
 ## Sea ice index
 subset <- "SeaIceIndex"
@@ -81,6 +121,10 @@ climate$record==subset
 
 value <- climate$value[climate$record==subset]
 year <- climate$year[climate$record==subset]
+
+valueSpline <- detrend.series(value,nyrs = 100,return.info=TRUE)
+plot(year,value,col="grey")
+points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
 
 
 gam1 <- gam(value ~ s(year,k=50), method = "REML")
@@ -94,6 +138,12 @@ prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
+prediction2 <- data.frame("year"=climatedat$Date_CE_mean)
+prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
+prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
 pdf("figures/climate/SeaIceIndex.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="YearCE",
@@ -101,14 +151,35 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      col="grey30")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=3,col="darkgreen",type='l')
+points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
 dev.off()
 
-##  "MD99-2275sstAlkenone" "MD99-2275sstDiatom"   "MD99-2275sstIP25" 
+colnames(prediction2) <- c("year","SeaIceIndex.GAM.fit","SeaIceIndex.GAM.fit.se","SeaIceIndex.GAM.fit.uppCI","SeaIceIndex.GAM.fit.lwrCI","SeaIceIndex.100yrspline")
+climatedat <- cbind(climatedat,prediction2)
+
+
+
+##  "MD99-2275sstAlkenone" 
 subset <- "MD99-2275sstAlkenone"
 climate$record==subset
 
 value <- climate$value[climate$record==subset]
 year <- climate$year[climate$record==subset]
+
+seq(min(year), max(year))
+interpol <- merge(data.frame("year"= seq(min(year), max(year))),data.frame("year" = year,"value"=value), by = "year", all = TRUE)
+interpol$value <- na.approx(interpol$value,x=interpol$year,na.rm = FALSE)                  
+
+valueSpline <- detrend.series(interpol$value,nyrs = 100,return.info=TRUE)
+plot(interpol$year,interpol$value,col="grey")
+points(interpol$year,valueSpline$series$Spline,type="l",col="yellow",lwd=3)
+test <- valueSpline$curves$Spline
+
+## interpolate and expand data 
+valueSpline <- detrend.series(value,nyrs = 100,return.info=TRUE)
+plot(year,value,col="grey")
+points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
+
 
 
 gam1 <- gam(value ~ s(year,k=100), method = "REML")
@@ -184,13 +255,20 @@ prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
 pdf("figures/climate/MD99-2275IP25.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
-     xlim=c(max(year),min(year)),
-     xlab="YearBP",
+     xlim=c(min(year),max(year)),
+     xlab="YearCE",
      ylab="MD99-2275IP25",
      col="grey30")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=3,col="darkgreen",type='l')
 dev.off()
+
+## output climate data 
+
+write.csv(climatedat,"metadata/climate.csv")
+
+
+
 
 
 

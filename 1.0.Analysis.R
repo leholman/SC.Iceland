@@ -8,6 +8,16 @@ library(vegan)
 library(RColorBrewer)
 library(breakaway)
 library("mgcv")
+library("Biostrings")
+library("seqinr")
+
+#### WAVELET STUFF
+
+
+xwt {biwavelet}
+
+
+
 
 
 ####====0.2 Functions====####
@@ -169,6 +179,9 @@ add.alpha <- function(col, alpha=1){
 ages <- read.csv("metadata/AgeOut.csv")
 ages$ID2 <- gsub("-","_",ages$ID)
 EUK.tax.PR2 <- read.csv("taxonomy/EUK.cleaned.PR2.csv",row.names = 1)
+climate <- read.csv("metadata/climate.csv",row.names = 1)
+
+
 
 ## EUK datasets
 EUK.GC1 <- read.csv("cleaneddata/combinedcoredata/EUK.GC01.csv",row.names = 1)
@@ -198,6 +211,18 @@ RIZ.P19 <- read.csv("cleaneddata/combinedcoredata/RIZ.PC019.csv",row.names = 1)
 RIZ.P19.nREPS <- NrepsMaker(RIZ.P19,gsub("(.*)_[0-9]$","\\1",colnames(RIZ.P19)))
 
 
+###Make taxonomic files
+MAMtax <- read.csv("taxonomy/MAM.combined.parsed.csv")
+MAMasv <- readDNAStringSet("cleaneddata/ASVs/MAM.cleaned.fasta")
+MAMtax$ASVseq <- as.character(MAMasv)[match(MAMtax$OTU,names(MAMasv))]
+
+write.csv(MAMtax,file = "taxonomy/byHand/MAMtax.csv")
+
+RIZtax <- read.csv("taxonomy/RIZ.combined.parsed.csv")
+RIZasv <- readDNAStringSet("cleaneddata/ASVs/RIZ.cleaned.fasta")
+RIZtax$ASVseq <- as.character(RIZasv)[match(RIZtax$OTU,names(RIZasv))]
+
+write.csv(RIZtax,file = "taxonomy/byHand/RIZtax.csv")
 
 
 
@@ -549,6 +574,8 @@ EUK.P19.MDS.j <- wcmdscale(vegdist(t(EUK.P19.avr),method = "jac",binary=TRUE),ei
 
 
 
+
+
 pdf("figures/EUK.P19.bray.nMDS.pdf",width = 9,height = 3.5)
 par(mfrow=c(1,3),mar=c(5.1, 4.1, 1.1, 1.1),xpd=TRUE)
 plot(EUK.P19.nMDS.b$points[,1],EUK.P19.nMDS.b$points[,2],xlab="nMDS1",ylab="nMDS2",pch=16,col=map_values_to_colors(ages$median[match(gsub("(.*)_[0-9]$","\\1",rownames(EUK.P19.nMDS.b$points)),ages$ID2)], "dodgerblue", "darkred"))
@@ -806,7 +833,45 @@ for (i in 1:length(dates)) {
   segments(top_x, top_y, bottom_x, bottom_y, col = 'gray')
 }
 
+#### here let's try some dbRDA
 
+
+vegdist(t(EUK.p19.avr.clim))
+
+ages$mean
+
+colnames(EUK.P19.avr)
+dbrda()
+
+
+EUK.p19.avr.clim <- EUK.P19.avr[,ages$mean[match(colnames(EUK.P19.avr),ages$ID2)]<995 & ages$mean[match(colnames(EUK.P19.avr),ages$ID2)]>222]
+
+colnames(EUK.p19.avr.clim)
+
+PC019.climate <- climate[match(colnames(EUK.p19.avr.clim),gsub("-","_",climate$Sample)),]
+
+
+Pc019.dbRDA.b <- dbrda(vegdist(t(EUK.p19.avr.clim))~d13C.GAM.fit+d13C.100yrspline+d18O.GAM.fit+d18O.100yrspline,PC019.climate)
+Pc019.dbRDA.j <- dbrda(vegdist(t(EUK.p19.avr.clim),method="jaccard",binary = TRUE)~d13C.GAM.fit+d13C.100yrspline+d18O.GAM.fit+d18O.100yrspline,PC019.climate)
+
+
+
+plot(Pc019.dbRDA.b)
+plot(Pc019.dbRDA.j)
+anova(Pc019.dbRDA.b,by="margin",permutations = 10000)
+anova(Pc019.dbRDA.j,by="margin",permutations = 10000)
+
+
+test <- metaMDS(vegdist(t(EUK.p19.avr.clim),method="jaccard",binary = TRUE),trymax = 200)
+out.test <- envfit(test,PC019.climate)
+plot(test)
+ordisurf(test,PC019.climate$d18O.100yrspline)
+
+
+test <- metaMDS(vegdist(t(EUK.p19.avr.clim)),trymax = 200)
+out.test <- envfit(test,PC019.climate)
+plot(test)
+ordisurf(test,PC019.climate$d18O.100yrspline)
 
 
 
