@@ -14,7 +14,7 @@ library("seqinr")
 #### WAVELET STUFF
 
 
-xwt {biwavelet}
+#xwt {biwavelet}
 
 
 
@@ -880,6 +880,17 @@ ordisurf(test,PC019.climate$d18O.100yrspline)
 plot(ages$median[match(colnames(MAM.P19.nREPS[245,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[245,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 
 plot(ages$median[match(colnames(RIZ.P19.nREPS[3,]),ages$ID2)],jitter(as.numeric(RIZ.P19.nREPS[43,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+
+
+#right whale ASV number
+c(10,169,230,293,336,392,490,491,502,504,514,517,534,565,576,594,612)
+
+plot(ages$median[match(colnames(MAM.P19.nREPS[c(10,169,230,293,336,392,490,491,502,504,514,517,534,565,576,594,612),]),ages$ID2)],
+     jitter(as.numeric(colSums(MAM.P19.nREPS[c(10,169,230,293,336,392,490,491,502,504,514,517,534,565,576,594,612),],na.rm = TRUE))),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+
+
+summary(test)
+plot(test)
 
 
 pdf("figures/RIZ.ASV2.pdf",width = 6,height = 6)

@@ -143,6 +143,7 @@ prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
 prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction2$lowrezspline <- valueSpline$curves$Spline[match(prediction2$year,year)]
 
 pdf("figures/climate/SeaIceIndex.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
@@ -166,21 +167,14 @@ climate$record==subset
 value <- climate$value[climate$record==subset]
 year <- climate$year[climate$record==subset]
 
+## interpolate and expand data 
 seq(min(year), max(year))
 interpol <- merge(data.frame("year"= seq(min(year), max(year))),data.frame("year" = year,"value"=value), by = "year", all = TRUE)
 interpol$value <- na.approx(interpol$value,x=interpol$year,na.rm = FALSE)                  
 
 valueSpline <- detrend.series(interpol$value,nyrs = 100,return.info=TRUE)
 plot(interpol$year,interpol$value,col="grey")
-points(interpol$year,valueSpline$series$Spline,type="l",col="yellow",lwd=3)
-test <- valueSpline$curves$Spline
-
-## interpolate and expand data 
-valueSpline <- detrend.series(value,nyrs = 100,return.info=TRUE)
-plot(year,value,col="grey")
-points(year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
-
-
+points(interpol$year,valueSpline$curves$Friedman,type="l",col="yellow",lwd=3)
 
 gam1 <- gam(value ~ s(year,k=100), method = "REML")
 plot(gam1)
@@ -193,6 +187,14 @@ prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
+prediction2 <- data.frame("yearCE"=climatedat$Date_CE_mean,"year"=climatedat$Date_bp_mean)
+prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
+prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction2$lowrezspline <- valueSpline$curves$Friedman[match(prediction2$year,interpol$year)]
+
+
 pdf("figures/climate/MD99-2275sstAlkenone.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,cex=0.4,
      xlim=c(max(year),min(year)),
@@ -201,17 +203,28 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      col="grey30")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=1,col="darkgreen",type='l')
+points(interpol$year,valueSpline$curves$Friedman,type="l",col="yellow",lwd=3)
 dev.off()
 
+colnames(prediction2) <- c("yearCE","yearBP","MD99-2275sstAlkenone.GAM.fit","MD99-2275sstAlkenone.GAM.fit.se","MD99-2275sstAlkenone.GAM.fit.uppCI","MD99-2275sstAlkenone.GAM.fit.lwrCI","MD99-2275sstAlkenone.100yrspline")
+climatedat <- cbind(climatedat,prediction2)
 
 
-##  "MD99-2275sstDiatom"   "MD99-2275sstIP25" 
+##  "MD99-2275sstDiatom"   
 subset <- "MD99-2275sstDiatom"
 climate$record==subset
 
 value <- climate$value[climate$record==subset]
 year <- climate$year[climate$record==subset]
 
+## interpolate and expand data 
+seq(min(year), max(year))
+interpol <- merge(data.frame("year"= seq(min(year), max(year))),data.frame("year" = year,"value"=value), by = "year", all = TRUE)
+interpol$value <- na.approx(interpol$value,x=interpol$year,na.rm = FALSE)                  
+
+valueSpline <- detrend.series(interpol$value,nyrs = 100,return.info=TRUE)
+plot(interpol$year,interpol$value,col="grey")
+points(interpol$year,valueSpline$curves$Friedman,type="l",col="yellow",lwd=3)
 
 gam1 <- gam(value ~ s(year,k=100), method = "REML")
 plot(gam1)
@@ -224,6 +237,14 @@ prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
+prediction2 <- data.frame("yearCE"=climatedat$Date_CE_mean,"year"=climatedat$Date_bp_mean)
+prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
+prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction2$lowrezspline <- valueSpline$curves$Friedman[match(prediction2$year,interpol$year)]
+
+
 pdf("figures/climate/MD99-2275sstDiatom.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlim=c(max(year),min(year)),
@@ -232,7 +253,12 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      col="grey30")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=3,col="darkgreen",type='l')
+points(interpol$year,valueSpline$curves$Friedman,type="l",col="yellow",lwd=3)
 dev.off()
+
+colnames(prediction2) <- c("yearCE","yearBP","MD99-2275sstDiatom.GAM.fit","MD99-2275sstDiatom.GAM.fit.se","MD99-2275sstDiatom.GAM.fit.uppCI","MD99-2275sstDiatom.GAM.fit.lwrCI","MD99-2275sstDiatom.100yrspline")
+climatedat <- cbind(climatedat,prediction2)
+
 
 ## "MD99-2275IP25" 
 subset <- "MD99-2275sstIP25" 
@@ -241,6 +267,13 @@ climate$record==subset
 value <- climate$value[climate$record==subset]
 year <- climate$year[climate$record==subset]
 
+## interpolate and expand data ))
+interpol <- merge(data.frame("year"= seq(min(year), max(year))),data.frame("year" = year,"value"=value), by = "year", all = TRUE)
+interpol$value <- na.approx(interpol$value,x=interpol$year,na.rm = FALSE)                  
+
+valueSpline <- detrend.series(interpol$value,nyrs = 100,return.info=TRUE)
+plot(interpol$year,interpol$value,col="grey")
+points(interpol$year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
 
 gam1 <- gam(value ~ s(year,k=100), method = "REML")
 plot(gam1)
@@ -253,6 +286,14 @@ prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
+prediction2 <- data.frame("yearCE"=climatedat$Date_CE_mean,"year"=climatedat$Date_bp_mean)
+prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
+prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+prediction2$lowrezspline <- valueSpline$curves$Friedman[match(prediction2$year,interpol$year)]
+
+
 pdf("figures/climate/MD99-2275IP25.pdf",height=6,width =11)
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlim=c(min(year),max(year)),
@@ -261,7 +302,11 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      col="grey30")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgreen',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=3,col="darkgreen",type='l')
+points(interpol$year,valueSpline$curves$Spline,type="l",col="yellow",lwd=3)
 dev.off()
+
+colnames(prediction2) <- c("yearCE","yearBP","MD99-2275IP25.GAM.fit","MD99-2275IP25.GAM.fit.se","MD99-2275IP25.GAM.fit.uppCI","MD99-2275IP25.GAM.fit.lwrCI","MD99-2275IP25.100yrspline")
+climatedat <- cbind(climatedat,prediction2)
 
 ## output climate data 
 
