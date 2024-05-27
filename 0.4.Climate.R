@@ -286,7 +286,7 @@ prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("yearCE"=climatedat$Date_CE_mean,"year"=climatedat$Date_bp_mean)
+prediction2 <- data.frame("year"=climatedat$Date_CE_mean,"yearBP"=climatedat$Date_bp_mean)
 prediction2$year[prediction2$year>max(year)|prediction2$year<min(year)] <- NA
 prediction2 <- cbind(prediction2,predict(gam1,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96

@@ -12,8 +12,6 @@ library("Biostrings")
 library("seqinr")
 
 #### WAVELET STUFF
-
-
 #xwt {biwavelet}
 
 
@@ -199,6 +197,19 @@ EUK.P19.nREPS <- NrepsMaker(EUK.P19,gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
 EUK.P19.avr <- average_by_reps(prop.table(as.matrix(EUK.P19),2),gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
 EUK.P19.bin <- make_binary(EUK.P19,1)
 EUK.P19.ages <- ages$median[match(colnames(EUK.P19.avr),ages$ID2)]
+
+EUK.p19.avr.bac <- EUK.P19.avr[match(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80],EUK.tax.PR2$X.1),]
+row.names(EUK.p19.avr.bac) <- EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80]
+
+
+EUK.p19.avr.met <- EUK.P19.avr[match(na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Subdivision=="Metazoa" & EUK.tax.PR2$Subdivision>80]),EUK.tax.PR2$X.1),]
+row.names(EUK.p19.avr.met) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Subdivision=="Metazoa" & EUK.tax.PR2$Subdivision>80])
+
+
+EUK.p19.avr.pro <- EUK.P19.avr[match(na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80]),EUK.tax.PR2$X.1),]
+row.names(EUK.p19.avr.pro) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80])
+
+
 
 
 ### MAM datasets
@@ -399,11 +410,178 @@ plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)),ages$ID2)],
      pch=16,
      xlab="Cal yr BP",
      ylab="ASV Richness",
-     col="grey",
-     ylim=c(500,1500))
+     col="grey")
+     #ylim=c(500,1500))
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
 points(prediction$year,prediction$fit,lwd=5,col="black",type='l')
 dev.off()
+
+
+
+### Just metazoa
+
+EUK.p19.avr.met.b <- make_binary((EUK.p19.avr.met)*1000000000000000,1)
+EUK.p19.avr.met.tax <- EUK.tax.PR2[na.omit(match(rownames(EUK.p19.avr.met),EUK.tax.PR2$X.1)),]
+EUK.p19.avr.met.tax$Genus[EUK.p19.avr.met.tax$Genus.1<80] <- NA
+genus_richness_per_site <- apply(EUK.p19.avr.met.b, 2, function (x) length(unique(EUK.p19.avr.met.tax$Genus[which(x == 1)])))
+
+
+P19.rich.gam.met  <- data.frame("year"=ages$median[match(colnames(EUK.p19.avr.met),ages$ID2)],
+                                "richness"=colSums(make_binary((EUK.p19.avr.met)*1000000000000000,1)),
+                                "genera.richness"=genus_richness_per_site)
+
+m <- gam(richness ~ s(year, k = 20), data = P19.rich.gam.met, method = "REML")
+prediction <- data.frame("year"=200:3100)
+prediction <- cbind(prediction,predict(m,prediction,se.fit=TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+m <- gam(genera.richness ~ s(year, k = 20), data = P19.rich.gam.met, method = "REML")
+prediction2 <- data.frame("year"=200:3100)
+prediction2 <- cbind(prediction2,predict(m,prediction2,se.fit=TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+  ## all
+pdf("figures/EUK.P19.richness.gam.met.pdf",width = 9,height = 4.5)
+plot(ages$median[match(colnames(EUK.p19.avr.met),ages$ID2)],
+     colSums(make_binary((EUK.p19.avr.met)*1000000000000000,1)),
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction$year,prediction$fit,lwd=5,col="black",type='l')
+dev.off()
+
+  ## genus
+pdf("figures/EUK.P19.richness.gam.met.genus.pdf",width = 9,height = 4.5)
+plot(ages$median[match(names(genus_richness_per_site),ages$ID2)],
+     genus_richness_per_site,
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction2$year,prediction2$fit,lwd=5,col="black",type='l')
+dev.off()
+
+### protists
+
+EUK.p19.avr.pro.b <- make_binary((EUK.p19.avr.pro)*1000000000000000,1)
+EUK.p19.avr.pro.tax <- EUK.tax.PR2[na.omit(match(rownames(EUK.p19.avr.pro),EUK.tax.PR2$X.1)),]
+EUK.p19.avr.pro.tax$Genus[EUK.p19.avr.pro.tax$Genus.1<80] <- NA
+genus_richness_per_site <- apply(EUK.p19.avr.pro.b, 2, function (x) length(unique(EUK.p19.avr.pro.tax$Genus[which(x == 1)])))
+
+
+P19.rich.gam.pro  <- data.frame("year"=ages$median[match(colnames(EUK.p19.avr.pro),ages$ID2)],
+                                "richness"=colSums(make_binary((EUK.p19.avr.pro)*1000000000000000,1)),
+                                "genera.richness"=genus_richness_per_site)
+
+m <- gam(richness ~ s(year, k = 20), data = P19.rich.gam.pro, method = "REML")
+prediction <- data.frame("year"=200:3100)
+prediction <- cbind(prediction,predict(m,prediction,se.fit=TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+m <- gam(genera.richness ~ s(year, k = 20), data = P19.rich.gam.pro, method = "REML")
+prediction2 <- data.frame("year"=200:3100)
+prediction2 <- cbind(prediction2,predict(m,prediction2,se.fit=TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+## all
+pdf("figures/EUK.P19.richness.gam.pro.pdf",width = 9,height = 4.5)
+plot(ages$median[match(colnames(EUK.p19.avr.pro),ages$ID2)],
+     colSums(make_binary((EUK.p19.avr.pro)*1000000000000000,1)),
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction$year,prediction$fit,lwd=5,col="black",type='l')
+dev.off()
+
+## genus
+pdf("figures/EUK.P19.richness.gam.pro.genus.pdf",width = 9,height = 4.5)
+plot(ages$median[match(names(genus_richness_per_site),ages$ID2)],
+     genus_richness_per_site,
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction2$year,prediction2$fit,lwd=5,col="black",type='l')
+dev.off()
+
+### bacteria
+
+EUK.p19.avr.bac.b <- make_binary((EUK.p19.avr.bac)*1000000000000000,1)
+EUK.p19.avr.bac.tax <- EUK.tax.PR2[na.omit(match(rownames(EUK.p19.avr.bac),EUK.tax.PR2$X.1)),]
+EUK.p19.avr.bac.tax$Genus[EUK.p19.avr.bac.tax$Genus.1<80] <- NA
+genus_richness_per_site <- apply(EUK.p19.avr.bac.b, 2, function (x) length(unique(EUK.p19.avr.bac.tax$Genus[which(x == 1)])))
+
+
+P19.rich.gam.bac  <- data.frame("year"=ages$median[match(colnames(EUK.p19.avr.bac),ages$ID2)],
+                                "richness"=colSums(make_binary((EUK.p19.avr.bac)*1000000000000000,1)),
+                                "genera.richness"=genus_richness_per_site)
+
+m <- gam(richness ~ s(year, k = 20), data = P19.rich.gam.bac, method = "REML")
+prediction <- data.frame("year"=200:3100)
+prediction <- cbind(prediction,predict(m,prediction,se.fit=TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+m <- gam(genera.richness ~ s(year, k = 20), data = P19.rich.gam.bac, method = "REML")
+prediction2 <- data.frame("year"=200:3100)
+prediction2 <- cbind(prediction2,predict(m,prediction2,se.fit=TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+## all
+pdf("figures/EUK.P19.richness.gam.bac.pdf",width = 9,height = 4.5)
+plot(ages$median[match(colnames(EUK.p19.avr.bac),ages$ID2)],
+     colSums(make_binary((EUK.p19.avr.bac)*1000000000000000,1)),
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction$year,prediction$fit,lwd=5,col="black",type='l')
+dev.off()
+
+## genus
+pdf("figures/EUK.P19.richness.gam.bac.genus.pdf",width = 9,height = 4.5)
+plot(ages$median[match(names(genus_richness_per_site),ages$ID2)],
+     genus_richness_per_site,
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('darkgrey',0.3), border=NA)
+points(prediction2$year,prediction2$fit,lwd=5,col="black",type='l')
+dev.off()
+
+
+
+
+
+
+
+
+plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.p19.avr.pro)),ages$ID2)],
+     colSums(make_binary((EUK.p19.avr.pro)*1000000000000000,1)),
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
+
+plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.p19.avr.bac)),ages$ID2)],
+     colSums(make_binary((EUK.p19.avr.bac)*1000000000000000,1)),
+     pch=16,
+     xlab="Cal yr BP",
+     ylab="ASV Richness",
+     col="grey")
 
 
 
