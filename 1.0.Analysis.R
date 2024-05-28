@@ -540,7 +540,7 @@ prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
 
 ## all
 pdf("figures/EUK.P19.richness.gam.bac.pdf",width = 9,height = 4.5)
-plot(ages$median[match(colnames(EUK.p19.avr.bac),ages$ID2)],
+plot(ages$mean[match(colnames(EUK.p19.avr.bac),ages$ID2)],
      colSums(make_binary((EUK.p19.avr.bac)*1000000000000000,1)),
      pch=16,
      xlab="Cal yr BP",
@@ -552,7 +552,7 @@ dev.off()
 
 ## genus
 pdf("figures/EUK.P19.richness.gam.bac.genus.pdf",width = 9,height = 4.5)
-plot(ages$median[match(names(genus_richness_per_site),ages$ID2)],
+plot(ages$mean[match(names(genus_richness_per_site),ages$ID2)],
      genus_richness_per_site,
      pch=16,
      xlab="Cal yr BP",
@@ -564,27 +564,117 @@ dev.off()
 
 
 
+#### now lets try and regress the data!
+
+#subset all observations between 225bp and 987bp
+datain <- colSums(make_binary((EUK.p19.avr.met)*1000000000000000,1))
+datain <- datain[ages$mean[match(names(datain),ages$ID2)] < 987 & ages$mean[match(names(datain),ages$ID2)] > 225]
+climate_subset <- climate[match(names(datain),gsub("-","_",climate$Sample)),]
+
+### make a massive GLM 
+
+datasetin <- data.frame(
+  richness = datain,
+  dateBP = climate_subset$Date_bp_mean,
+  d18O_GAM_fit = climate_subset$d18O.GAM.fit,
+  d18O_100yrspline = climate_subset$d18O.100yrspline,
+  d13C_GAM_fit = climate_subset$d13C.GAM.fit,
+  d13C_100yrspline = climate_subset$d13C.100yrspline,
+  MD99_2275sstAlkenone_GAM_fit = climate_subset$MD99.2275sstAlkenone.GAM.fit,
+  MD99_2275sstAlkenone_100yrspline = climate_subset$MD99.2275sstAlkenone.100yrspline,
+  MD99_2275sstDiatom_GAM_fit = climate_subset$MD99.2275sstDiatom.GAM.fit,
+  MD99_2275sstDiatom_100yrspline = climate_subset$MD99.2275sstDiatom.100yrspline,
+  MD99_2275IP25_GAM_fit = climate_subset$MD99.2275IP25.GAM.fit,
+  MD99_2275IP25_100yrspline = climate_subset$MD99.2275IP25.100yrspline
+)
+
+datasetin.mini <- datasetin[,c(1,2,4,6,7,9,11)]
+
+pdf("figures/climate/comparison.met.pdf",width = 9.5,height = 7)
+plot(datasetin.mini,pch=16)
+dev.off()
+
+m1 <- glm(richness~dateBP+
+            d18O_GAM_fit+
+            d18O_100yrspline+
+            d13C_GAM_fit+
+            d13C_100yrspline+
+            MD99_2275sstAlkenone_GAM_fit+
+            MD99_2275sstAlkenone_100yrspline+
+            MD99_2275sstDiatom_GAM_fit+
+            MD99_2275sstDiatom_100yrspline+
+            MD99_2275IP25_GAM_fit+
+            MD99_2275IP25_100yrspline,
+          data=datasetin)
+
+plot(m1)
+summary(m1)
+
+summary(lm(richness~dateBP,data=datasetin))
+summary(lm(richness~d18O_100yrspline,data=datasetin))
+summary(lm(richness~d13C_100yrspline,data=datasetin))
+summary(lm(richness~MD99_2275sstAlkenone_GAM_fit,data=datasetin))
+summary(lm(richness~MD99_2275sstDiatom_GAM_fit,data=datasetin))
+summary(lm(richness~MD99_2275IP25_GAM_fit,data=datasetin))
 
 
+#Make in intelligent/interesting GLM
 
 
-
-plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.p19.avr.pro)),ages$ID2)],
-     colSums(make_binary((EUK.p19.avr.pro)*1000000000000000,1)),
-     pch=16,
-     xlab="Cal yr BP",
-     ylab="ASV Richness",
-     col="grey")
-
-plot(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.p19.avr.bac)),ages$ID2)],
-     colSums(make_binary((EUK.p19.avr.bac)*1000000000000000,1)),
-     pch=16,
-     xlab="Cal yr BP",
-     ylab="ASV Richness",
-     col="grey")
+m2 <- glm(richness ~ dateBP + 
+            d18O_100yrspline + 
+            d13C_100yrspline+
+            MD99_2275sstAlkenone_GAM_fit + 
+            MD99_2275sstDiatom_GAM_fit+
+            MD99_2275IP25_GAM_fit, 
+          data = datasetin)
 
 
+m3 <- glm(richness ~ dateBP + 
+            d18O_100yrspline + 
+            MD99_2275sstAlkenone_GAM_fit,
+          data = datasetin)
 
+
+summary(m2)
+summary(m3)
+
+pdf("figures/climate/GLM.met.pdf",width = 9.5,height = 6.5)
+par(mfrow=c(3,1))
+plot(allEffects(m3))
+dev.off()
+
+ #climate_subset <- climate[climate$Core=="PC019" & climate$Date_bp_mean > 225 & climate$Date_bp_mean < 987,]
+
+### let's plot some climate lines
+pdf("figures/climate/Pc019overview.pdf",width = 5,height = 9)
+par(mfrow=c(5,1),mar=c(0.5, 4.1, 0.5, 0.5))
+plot(climate_subset$Date_CE_mean[order(climate_subset$Date_CE_mean)],climate_subset$d13C.100yrspline[order(climate_subset$Date_CE_mean)],lwd=3,type="l",bty="n",xlab="Year CE",ylab="d13C",xaxt='n')
+plot(climate_subset$Date_CE_mean[order(climate_subset$Date_CE_mean)],climate_subset$d18O.100yrspline[order(climate_subset$Date_CE_mean)],lwd=3,type="l",bty="n",xlab="Year CE",ylab="d18O",xaxt='n')
+plot(climate_subset$Date_CE_mean[order(climate_subset$Date_CE_mean)],climate_subset$MD99.2275sstAlkenone.GAM.fit[order(climate_subset$Date_CE_mean)],lwd=3,type="l",bty="n",xlab="Year CE",ylab="Alkenone",xaxt='n')
+plot(climate_subset$Date_CE_mean[order(climate_subset$Date_CE_mean)],climate_subset$MD99.2275sstDiatom.GAM.fit[order(climate_subset$Date_CE_mean)],lwd=3,type="l",bty="n",xlab="Year CE",ylab="DiatomTF",xaxt='n')
+par(mar=c(3, 4.1, 0.5, 0.5))
+plot(climate_subset$Date_CE_mean[order(climate_subset$Date_CE_mean)],climate_subset$MD99.2275IP25.GAM.fit[order(climate_subset$Date_CE_mean)],lwd=3,type="l",bty="n",xlab="Year CE",ylab="IP25",xaxt='n')
+axis(1,seq(1000,1700,100),cex=3)
+dev.off()
+
+climate <- read.csv("rawdata/climate/combined.csv")
+
+pdf("figures/climate/Pc019overlap.pdf",width = 8,height = 4.5)
+par(mar=c(5.1, 10.1, 0.5, 0.5))
+plot(1950-ages$mean[match(colnames(EUK.p19.avr.bac),ages$ID2)],
+     rep(1,length(1950-ages$mean[match(colnames(EUK.p19.avr.bac),ages$ID2)])),pch=16,
+     ylim=c(0,7),xlim=c(-8000,1900),yaxt='n',ylab="",xlab="Year CE")
+polygon(c(1725,1725,963,963),c(-1,8,8,-1),col="grey",border = NA)
+points(1950-ages$mean[match(colnames(EUK.p19.avr.bac),ages$ID2)],rep(1,length(1950-ages$mean[match(colnames(EUK.p19.avr.bac),ages$ID2)])),pch=16)
+points(climate$year[climate$record=="Arcticad13C" ],rep(2,length(climate$year[climate$record=="Arcticad13C" ])),pch=16)
+points(climate$year[climate$record=="Arcticad18O"],rep(3,length(climate$year[climate$record=="Arcticad18O"])),pch=16)
+points(climate$year[climate$record=="SeaIceIndex"],rep(4,length(climate$year[climate$record=="SeaIceIndex"])),pch=16)
+points(1950-climate$year[climate$record=="MD99-2275sstAlkenone"],rep(5,length(climate$year[climate$record=="MD99-2275sstAlkenone"])),pch=16)
+points(1950-climate$year[climate$record=="MD99-2275sstDiatom"],rep(6,length(climate$year[climate$record=="MD99-2275sstDiatom"])),pch=16)
+points(climate$year[climate$record=="MD99-2275sstIP25" ],rep(7,length(climate$year[climate$record=="MD99-2275sstIP25" ])),pch=16)
+axis(2,1:7,labels=c("eDNA samples","Arcticad13C","Arcticad18O","SeaIceIndex","MD99-2275sstAlkenone","MD99-2275sstDiatom","MD99-2275sstIP25"),las=1)
+dev.off()
 
 ####====3.0 Beta diversity ====####
 
@@ -995,21 +1085,7 @@ par(mar=c(1, 3.1, 1.1, 1.1))
 barplot(round((EUK.P19.MDS.j$eig[EUK.P19.MDS.j$eig>0]/sum(EUK.P19.MDS.j$eig[EUK.P19.MDS.j$eig>0]))*100,1),col=c("dodgerblue","pink3","darkgreen","gold",rep("grey",length(EUK.P19.MDS.j$eig)-4)))
 dev.off()
 
-## little connecting thing
-dates <-sort(unique(ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)),ages$ID2)]))
 
-for (i in 1:length(dates)) {
-  # Coordinates for the top plot (linear)
-  top_x <- i
-  top_y <- par("usr")[3]
-  
-  # Coordinates for the bottom plot (dates)
-  bottom_x <- i
-  bottom_y <- par("usr")[4]
-  
-  # Draw the line
-  segments(top_x, top_y, bottom_x, bottom_y, col = 'gray')
-}
 
 #### here let's try some dbRDA
 
@@ -1050,6 +1126,68 @@ test <- metaMDS(vegdist(t(EUK.p19.avr.clim)),trymax = 200)
 out.test <- envfit(test,PC019.climate)
 plot(test)
 ordisurf(test,PC019.climate$d18O.100yrspline)
+
+
+### here lets try some beta diversity plots of data subsets (metazoa/protist/bacteria)
+
+#met
+EUK.P19.nMDS.met.b <- metaMDS(vegdist(t(EUK.p19.avr.met[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.met))])),k=2,trymax = 1000,parallel=8)
+EUK.P19.nMDS.met.j <- metaMDS(vegdist(t(EUK.p19.avr.met[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.met))]),binary = TRUE,method="jaccard"),k=2,trymax = 1000,parallel=8)
+EUK.P19.MDS.met.b <- wcmdscale(vegdist(t(EUK.p19.avr.met[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.met))])),eig = TRUE)
+EUK.P19.MDS.met.j <- wcmdscale(vegdist(t(EUK.p19.avr.met[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.met))]),binary = TRUE,method="jaccard"),eig = TRUE)
+
+pdf("figures/climate/EUK.P19.climate.ord.met.pdf",width = 9 ,height = 9)
+par(mfrow=c(2,2))
+plot(EUK.P19.nMDS.met.b$points[,1],EUK.P19.nMDS.met.b$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.nMDS.met.b$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.nMDS.met.j$points[,1],EUK.P19.nMDS.met.j$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.nMDS.met.j$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.MDS.met.b$points[,1],EUK.P19.MDS.met.b$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.MDS.met.b$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.MDS.met.j$points[,1],EUK.P19.MDS.met.j$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.MDS.met.j$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+dev.off()
+
+envfit(EUK.P19.nMDS.met.b,datasetin)
+envfit(EUK.P19.nMDS.met.j,datasetin)
+envfit(EUK.P19.MDS.met.b ,datasetin)
+envfit(EUK.P19.MDS.met.j ,datasetin)
+
+#pro
+EUK.P19.nMDS.pro.b <- metaMDS(vegdist(t(EUK.p19.avr.pro[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.pro))])),k=2,trymax = 1000,parallel=8)
+EUK.P19.nMDS.pro.j <- metaMDS(vegdist(t(EUK.p19.avr.pro[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.pro))]),binary = TRUE,method="jaccard"),k=2,trymax = 1000,parallel=8)
+EUK.P19.MDS.pro.b <- wcmdscale(vegdist(t(EUK.p19.avr.pro[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.pro))])),eig = TRUE)
+EUK.P19.MDS.pro.j <- wcmdscale(vegdist(t(EUK.p19.avr.pro[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.pro))]),binary = TRUE,method="jaccard"),eig = TRUE)
+
+pdf("figures/climate/EUK.P19.climate.ord.pro.pdf",width = 9 ,height = 9)
+par(mfrow=c(2,2))
+plot(EUK.P19.nMDS.pro.b$points[,1],EUK.P19.nMDS.pro.b$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.nMDS.pro.b$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.nMDS.pro.j$points[,1],EUK.P19.nMDS.pro.j$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.nMDS.pro.j$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.MDS.pro.b$points[,1],EUK.P19.MDS.pro.b$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.MDS.pro.b$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.MDS.pro.j$points[,1],EUK.P19.MDS.pro.j$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.MDS.pro.j$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+dev.off()
+
+envfit(EUK.P19.nMDS.pro.b,datasetin)
+envfit(EUK.P19.nMDS.pro.j,datasetin)
+envfit(EUK.P19.MDS.pro.b ,datasetin)
+envfit(EUK.P19.MDS.pro.j ,datasetin)
+
+#bac
+EUK.P19.nMDS.bac.b <- metaMDS(vegdist(t(EUK.p19.avr.bac[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.bac))])),k=2,trymax = 1000,parallel=8)
+EUK.P19.nMDS.bac.j <- metaMDS(vegdist(t(EUK.p19.avr.bac[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.bac))]),binary = TRUE,method="jaccard"),k=2,trymax = 1000,parallel=8)
+EUK.P19.MDS.bac.b <- wcmdscale(vegdist(t(EUK.p19.avr.bac[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.bac))])),eig = TRUE)
+EUK.P19.MDS.bac.j <- wcmdscale(vegdist(t(EUK.p19.avr.bac[,match(gsub("-","_",climate_subset$Sample),colnames(EUK.p19.avr.bac))]),binary = TRUE,method="jaccard"),eig = TRUE)
+
+pdf("figures/climate/EUK.P19.climate.ord.bac.pdf",width = 9 ,height = 9)
+par(mfrow=c(2,2))
+plot(EUK.P19.nMDS.bac.b$points[,1],EUK.P19.nMDS.bac.b$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.nMDS.bac.b$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.nMDS.bac.j$points[,1],EUK.P19.nMDS.bac.j$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.nMDS.bac.j$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.MDS.bac.b$points[,1],EUK.P19.MDS.bac.b$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.MDS.bac.b$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+plot(EUK.P19.MDS.bac.j$points[,1],EUK.P19.MDS.bac.j$points[,2],col=map_values_to_colors(ages$mean[match(rownames(EUK.P19.MDS.bac.j$points),ages$ID2)], "dodgerblue", "darkred"),pch=16)
+dev.off()
+
+envfit(EUK.P19.nMDS.bac.b,datasetin)
+envfit(EUK.P19.nMDS.bac.j,datasetin)
+envfit(EUK.P19.MDS.bac.b ,datasetin)
+envfit(EUK.P19.MDS.bac.j ,datasetin)
+
+
 
 
 
