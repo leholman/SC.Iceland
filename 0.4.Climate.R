@@ -69,6 +69,19 @@ dev.off()
 colnames(prediction2) <- c("year","d13C.GAM.fit","d13C.GAM.fit.se","d13C.GAM.fit.uppCI","d13C.GAM.fit.lwrCI","d13C.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
 
+pdf("figures/composite/d13C.pdf",height=4,width =10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
+     xlab="",
+     col=add.alpha('lightgreen',0.3),
+     xlim=c(-1550,2000),
+     xaxt = 'n', bty = 'n',
+     yaxt ="n",ylab="")
+axis(4,at=c(1.5,2,2.5,3))
+mtext("Arctica d13C", side = 4, line = 3,col="green4")
+points(year,valueSpline$curves$Spline,type="l",col="green4",lwd=3)
+dev.off()
+
 
 ## delta 18O
 
@@ -115,6 +128,21 @@ colnames(prediction2) <- c("year","d18O.GAM.fit","d18O.GAM.fit.se","d18O.GAM.fit
 climatedat <- cbind(climatedat,prediction2)
 
 
+pdf("figures/composite/d18O.pdf",height=4,width =10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
+     xlab="",
+     col=add.alpha('green3',0.3),
+     xlim=c(-1550,2000),
+     xaxt = 'n', bty = 'n',
+     yaxt ="n",ylab="")
+axis(4,at=c(3,3.5,4))
+mtext("Arctica d18O", side = 4, line = 3,col="green3")
+points(year,valueSpline$curves$Spline,type="l",col="seagreen",lwd=3)
+dev.off()
+
+
+
 ## Sea ice index
 subset <- "SeaIceIndex"
 climate$record==subset
@@ -157,6 +185,7 @@ dev.off()
 
 colnames(prediction2) <- c("year","SeaIceIndex.GAM.fit","SeaIceIndex.GAM.fit.se","SeaIceIndex.GAM.fit.uppCI","SeaIceIndex.GAM.fit.lwrCI","SeaIceIndex.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
+
 
 
 
@@ -209,6 +238,22 @@ dev.off()
 colnames(prediction2) <- c("yearCE","yearBP","MD99-2275sstAlkenone.GAM.fit","MD99-2275sstAlkenone.GAM.fit.se","MD99-2275sstAlkenone.GAM.fit.uppCI","MD99-2275sstAlkenone.GAM.fit.lwrCI","MD99-2275sstAlkenone.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
 
+pdf("figures/composite/MD99Alkenone.pdf",height=4,width =10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(1950-climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
+     xlab="",
+     col=add.alpha('darkolivegreen',0.3),
+     xlim=c(-1550,2000),
+     ylim=c(6.5,10),
+     xaxt = 'n', bty = 'n',
+     ylab ="MD99-2275Alkenone SST",
+     col.lab = "darkgreen")
+points(1950-interpol$year,valueSpline$curves$Friedman,type="l",col="darkgreen",lwd=3)
+dev.off()
+
+
+
+
 
 ##  "MD99-2275sstDiatom"   
 subset <- "MD99-2275sstDiatom"
@@ -259,6 +304,24 @@ dev.off()
 colnames(prediction2) <- c("yearCE","yearBP","MD99-2275sstDiatom.GAM.fit","MD99-2275sstDiatom.GAM.fit.se","MD99-2275sstDiatom.GAM.fit.uppCI","MD99-2275sstDiatom.GAM.fit.lwrCI","MD99-2275sstDiatom.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
 
+pdf("figures/composite/MD99DiatomTF.pdf",height=4,width =10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(1950-climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
+     xlab="",
+     col=add.alpha('green',0.3),
+     xlim=c(-1550,2000),
+     ylim=c(6.5,10),
+     xaxt = 'n', bty = 'n',
+     ylab ="")
+abline(h=8,lty=2,col="grey")
+mtext("MD99-2275DiatomTF SST", side = 2, line = 2,col="springgreen2")
+points(1950-interpol$year,valueSpline$curves$Friedman,type="l",col="springgreen2",lwd=3)
+dev.off()
+
+
+
+
+
 
 ## "MD99-2275IP25" 
 subset <- "MD99-2275sstIP25" 
@@ -308,9 +371,48 @@ dev.off()
 colnames(prediction2) <- c("yearCE","yearBP","MD99-2275IP25.GAM.fit","MD99-2275IP25.GAM.fit.se","MD99-2275IP25.GAM.fit.uppCI","MD99-2275IP25.GAM.fit.lwrCI","MD99-2275IP25.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
 
+
+
+pdf("figures/composite/MD99-2275IP25.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
+     xlab="",
+     col=add.alpha('yellowgreen',0.3),
+     xlim=c(-1550,2000),
+     ylim=c(0,3.2),
+     xaxt = 'n', bty = 'n',
+     yaxt="n",
+     ylab ="")
+axis(4,at=c(0,1,2,3))
+mtext("MD99-2275 IP25 SeaIce", side = 4, line = 3,col="olivedrab")
+points(interpol$year,valueSpline$curves$Friedman,type="l",col="olivedrab",lwd=3)
+dev.off()
+
+
 ## output climate data 
 
 write.csv(climatedat,"metadata/climate.csv")
+
+
+
+#### now lets look at people 
+
+
+pop <- read.csv("rawdata/human/settlement.csv")
+
+       
+
+pdf("figures/composite/HumanPOP.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(pop$Date,pop$Population,
+     xlim=c(-1550,2000),
+      bty = 'n',xaxt='n',yaxt="n",ylab="",xlab="",
+     type="l",lwd=3,col="orange")
+mtext("Iceland Human Population", side = 4, line = 3,col="orange")
+axis(4,at=c(0,50000,100000,150000,200000,250000))
+axis(3,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
+dev.off()
+
 
 
 

@@ -1199,36 +1199,42 @@ EUKtax.h <- read.csv("taxonomy/byHand/EUKtax_assigned1006.csv")
 
 for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Genus"])){
 loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
-loopData1 <- EUK.P19.nREPS[loopASVs,]
-loopData2 <- EUK.GC1.nREPS[loopASVs,]
+loopData1 <- colSums(EUK.P19[loopASVs,])
+loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+loopData2 <- colSums(EUK.GC1[loopASVs,])
+loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
 pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
 par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
 dev.off()
 }
 
 
 for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Family"])){
   loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
-  loopData1 <- EUK.P19.nREPS[loopASVs,]
-  loopData2 <- EUK.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(EUK.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(EUK.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
 
 for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Order"])){
   loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
-  loopData1 <- EUK.P19.nREPS[loopASVs,]
-  loopData2 <- EUK.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(EUK.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(EUK.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1244,36 +1250,42 @@ unique(RIZtax.h$ID[RIZtax.h$Level=="Species" & RIZtax.h$X.1.base.in.difference==
 
 for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Species" & RIZtax.h$X.1.base.in.difference=="Y"])){
   loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
-  loopData1 <- RIZ.P19.nREPS[loopASVs,]
-  loopData2 <- RIZ.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(RIZ.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(RIZ.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
 
 for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Genus"])){
   loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
-  loopData1 <- RIZ.P19.nREPS[loopASVs,]
-  loopData2 <- RIZ.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(RIZ.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(RIZ.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
 
 for (taxa in unique(RIZtax.h$Assignment[RIZtax.h$Level=="Family"])){
   loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
-  loopData1 <- RIZ.P19.nREPS[loopASVs,]
-  loopData2 <- RIZ.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(RIZ.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(RIZ.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1288,36 +1300,42 @@ taxa <- "Cystophora cristata"
 
 for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Species" & MAMtax.h$X.1.base.in.difference=="Y"])){
   loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
-  loopData1 <- MAM.P19.nREPS[loopASVs,]
-  loopData2 <- MAM.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(MAM.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(MAM.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
 
 for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Genus"])){
   loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
-  loopData1 <- MAM.P19.nREPS[loopASVs,]
-  loopData2 <- MAM.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(MAM.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(MAM.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
 
 for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Family"])){
   loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
-  loopData1 <- MAM.P19.nREPS[loopASVs,]
-  loopData2 <- MAM.GC1.nREPS[loopASVs,]
+  loopData1 <- colSums(MAM.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(MAM.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1386,5 +1404,8 @@ summary(test)
 prediction <- data.frame("year"=200:3000)
 prediction <- cbind(prediction,predict(test,prediction,se.fit=TRUE))
 plot(prediction$year,prediction$fit)
+
+
+
 
 
