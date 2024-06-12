@@ -189,8 +189,6 @@ EUK.GC1.bin <- make_binary(EUK.GC1,1)
 EUK.GC1.ages <- ages$median[match(colnames(EUK.GC1.avr),ages$ID2)]
 
 EUK.P19 <- read.csv("cleaneddata/combinedcoredata/EUK.PC019.csv",row.names = 1)
-## make a subset of the data gettign rid of high resolution volcano samples 
-ages$ID2[184:204]
 
 
 EUK.P19.nREPS <- NrepsMaker(EUK.P19,gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19)))
@@ -201,10 +199,8 @@ EUK.P19.ages <- ages$median[match(colnames(EUK.P19.avr),ages$ID2)]
 EUK.p19.avr.bac <- EUK.P19.avr[match(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80],EUK.tax.PR2$X.1),]
 row.names(EUK.p19.avr.bac) <- EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80]
 
-
 EUK.p19.avr.met <- EUK.P19.avr[match(na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Subdivision=="Metazoa" & EUK.tax.PR2$Subdivision>80]),EUK.tax.PR2$X.1),]
 row.names(EUK.p19.avr.met) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Subdivision=="Metazoa" & EUK.tax.PR2$Subdivision>80])
-
 
 EUK.p19.avr.pro <- EUK.P19.avr[match(na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80]),EUK.tax.PR2$X.1),]
 row.names(EUK.p19.avr.pro) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80])
@@ -212,17 +208,28 @@ row.names(EUK.p19.avr.pro) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacte
 
 
 
+
+
 ### MAM datasets
 MAM.P19 <- read.csv("cleaneddata/combinedcoredata/MAM.PC019.csv",row.names = 1)
 MAM.P19.nREPS <- NrepsMaker(MAM.P19,gsub("(.*)_[0-9]$","\\1",colnames(MAM.P19)))
-
+MAM.GC1 <- read.csv("cleaneddata/combinedcoredata/MAM.GC01.csv",row.names = 1)
+MAM.GC1.nREPS <- NrepsMaker(MAM.GC1,gsub("(.*)_[0-9]$","\\1",colnames(MAM.GC1)))
 
 ### RIZ datasets
 RIZ.P19 <- read.csv("cleaneddata/combinedcoredata/RIZ.PC019.csv",row.names = 1)
 RIZ.P19.nREPS <- NrepsMaker(RIZ.P19,gsub("(.*)_[0-9]$","\\1",colnames(RIZ.P19)))
-
+RIZ.GC1 <- read.csv("cleaneddata/combinedcoredata/RIZ.GC01.csv",row.names = 1)
+RIZ.GC1.nREPS <- NrepsMaker(RIZ.GC1,gsub("(.*)_[0-9]$","\\1",colnames(RIZ.GC1)))
 
 ###Make taxonomic files
+
+EUKtax <- read.csv("taxonomy/EUK.combined.parsed.csv")
+EUKasv <- readDNAStringSet("cleaneddata/ASVs/EUK.cleaned.fasta")
+EUKtax$ASVseq <- as.character(EUKasv)[match(EUKtax$OTU,names(EUKasv))]
+write.csv(EUKtax,file = "taxonomy/byHand/EUKtax.csv")
+
+
 MAMtax <- read.csv("taxonomy/MAM.combined.parsed.csv")
 MAMasv <- readDNAStringSet("cleaneddata/ASVs/MAM.cleaned.fasta")
 MAMtax$ASVseq <- as.character(MAMasv)[match(MAMtax$OTU,names(MAMasv))]
@@ -1187,7 +1194,153 @@ envfit(EUK.P19.nMDS.bac.j,datasetin)
 envfit(EUK.P19.MDS.bac.b ,datasetin)
 envfit(EUK.P19.MDS.bac.j ,datasetin)
 
+### lets make some fish plots 
+EUKtax.h <- read.csv("taxonomy/byHand/EUKtax_assigned1006.csv")
 
+for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Genus"])){
+loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
+loopData1 <- EUK.P19.nREPS[loopASVs,]
+loopData2 <- EUK.GC1.nREPS[loopASVs,]
+pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
+par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+dev.off()
+}
+
+
+for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Family"])){
+  loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
+  loopData1 <- EUK.P19.nREPS[loopASVs,]
+  loopData2 <- EUK.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+
+for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Order"])){
+  loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
+  loopData1 <- EUK.P19.nREPS[loopASVs,]
+  loopData2 <- EUK.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+### now some whale plots
+
+##RIZ
+RIZtax.h <- read.csv("taxonomy/byHand/RIZtax_assigned2105.csv")
+
+unique(RIZtax.h$ID[RIZtax.h$Level=="Family"])
+unique(RIZtax.h$ID[RIZtax.h$Level=="Genus"])
+unique(RIZtax.h$ID[RIZtax.h$Level=="Species" & RIZtax.h$X.1.base.in.difference=="Y"])
+
+
+for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Species" & RIZtax.h$X.1.base.in.difference=="Y"])){
+  loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
+  loopData1 <- RIZ.P19.nREPS[loopASVs,]
+  loopData2 <- RIZ.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+
+for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Genus"])){
+  loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
+  loopData1 <- RIZ.P19.nREPS[loopASVs,]
+  loopData2 <- RIZ.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+
+for (taxa in unique(RIZtax.h$Assignment[RIZtax.h$Level=="Family"])){
+  loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
+  loopData1 <- RIZ.P19.nREPS[loopASVs,]
+  loopData2 <- RIZ.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+##MAM
+
+MAMtax.h <- read.csv("taxonomy/byHand/MAMtax_assigned2105.csv")
+
+unique(MAMtax.h$ID[MAMtax.h$Level=="Family"])
+unique(MAMtax.h$ID[MAMtax.h$Level=="Genus"])
+unique(MAMtax.h$ID[MAMtax.h$Level=="Species" & MAMtax.h$X.1.base.in.difference=="Y"])
+taxa <- "Cystophora cristata"
+
+for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Species" & MAMtax.h$X.1.base.in.difference=="Y"])){
+  loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
+  loopData1 <- MAM.P19.nREPS[loopASVs,]
+  loopData2 <- MAM.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+
+for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Genus"])){
+  loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
+  loopData1 <- MAM.P19.nREPS[loopASVs,]
+  loopData2 <- MAM.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+
+for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Family"])){
+  loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
+  loopData1 <- MAM.P19.nREPS[loopASVs,]
+  loopData2 <- MAM.GC1.nREPS[loopASVs,]
+  pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(colnames(loopData1),ages$ID2)],jitter(as.numeric(colSums(loopData1))),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(colnames(loopData2),ages$ID2)],jitter(as.numeric(colSums(loopData2))),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+
+#### workshop 
+
+taxa <- "Cystophora cristata"
+#for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Family"])){
+#for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Genus"])){
+for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Species" & MAMtax.h$X.1.base.in.difference=="Y"])){
+  loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
+  loopData1 <- colSums(MAM.P19[loopASVs,])
+  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+  loopData2 <- colSums(MAM.GC1[loopASVs,])
+  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
+  pdf(paste0("figures/SpecificTaxa/test/MAM.",taxa,".pdf"),height=7,width = 9)
+  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  dev.off()
+}
+
+tapply(loopData1 < 0, names(loopData1), sum)
 
 
 
@@ -1195,7 +1348,7 @@ envfit(EUK.P19.MDS.bac.j ,datasetin)
 
 plot(ages$median[match(colnames(MAM.P19.nREPS[245,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[245,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 
-plot(ages$median[match(colnames(RIZ.P19.nREPS[3,]),ages$ID2)],jitter(as.numeric(RIZ.P19.nREPS[43,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
+plot(ages$median[match(colnames(MAM.P19.nREPS[3,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[43,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 
 
 #right whale ASV number
@@ -1209,15 +1362,15 @@ summary(test)
 plot(test)
 
 
-pdf("figures/RIZ.ASV2.pdf",width = 6,height = 6)
+pdf("figures/MAM.ASV2.pdf",width = 6,height = 6)
 plot(ages$median[match(colnames(MAM.P19.nREPS[2,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[2,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 dev.off()
 
-pdf("figures/RIZ.ASV3.pdf",width = 6,height = 6)
+pdf("figures/MAM.ASV3.pdf",width = 6,height = 6)
 plot(ages$median[match(colnames(MAM.P19.nREPS[3,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[3,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 dev.off()
 
-pdf("figures/RIZ.ASV25.pdf",width = 6,height = 6)
+pdf("figures/MAM.ASV25.pdf",width = 6,height = 6)
 plot(ages$median[match(colnames(MAM.P19.nREPS[25,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[4,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 dev.off()
 
