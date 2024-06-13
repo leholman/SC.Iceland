@@ -1205,8 +1205,8 @@ loopData2 <- colSums(EUK.GC1[loopASVs,])
 loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
 pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
 par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
 dev.off()
 }
 
@@ -1219,8 +1219,8 @@ for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Family"])){
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1233,8 +1233,8 @@ for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Order"])){
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Order:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1256,8 +1256,8 @@ for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Species" & RIZtax.h$X.1.base.in
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1270,8 +1270,8 @@ for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Genus"])){
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1284,8 +1284,8 @@ for (taxa in unique(RIZtax.h$Assignment[RIZtax.h$Level=="Family"])){
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1306,8 +1306,8 @@ for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Species" & MAMtax.h$X.1.base.in
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1320,8 +1320,8 @@ for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Genus"])){
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
 
@@ -1334,10 +1334,163 @@ for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Family"])){
   loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
   pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
   par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$median[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$median[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
   dev.off()
 }
+
+### Some plots for the composite plot 
+
+## lets do one of EUK cod first 
+taxa <- "Gadus"
+
+loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
+loopData1 <- colSums(EUK.P19[loopASVs,])
+loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+loopData2 <- colSums(EUK.GC1[loopASVs,])
+loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
+
+year1 <- 1950-ages$mean[match(names(loopData1),ages$ID2)]
+value1 <- as.numeric(loopData1)
+year2 <- 1950-ages$mean[match(names(loopData2),ages$ID2)]
+value2 <- as.numeric(loopData2)
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/composite/codDNA.pdf",height=3,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(year1,value1,pch=16,col="slateblue",
+     xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab="Gadus eDNA DetectionProp",xlab="",col.lab ="navyblue")
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
+points(year2,value2,pch=16,col="lightblue4")
+abline(h=4,lty=2,col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
+par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+dev.off()
+
+## now clupea
+taxa <- "Clupea"
+
+loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
+loopData1 <- colSums(EUK.P19[loopASVs,])
+loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+loopData2 <- colSums(EUK.GC1[loopASVs,])
+loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
+
+year1 <- 1950-ages$mean[match(names(loopData1),ages$ID2)]
+value1 <- as.numeric(loopData1)
+year2 <- 1950-ages$mean[match(names(loopData2),ages$ID2)]
+value2 <- as.numeric(loopData2)
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/composite/clupeaDNA.pdf",height=3,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(year1,value1,pch=16,col="slateblue",ylim=c(0,8),
+     xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab="Clupea eDNA DetectionProp",xlab="",col.lab ="navyblue")
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
+points(year2,value2,pch=16,col="lightblue4")
+abline(h=4,lty=2,col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+## strange jellyfish
+
+loopASVs <- 750
+
+loopData1 <- colSums(EUK.P19[loopASVs,])
+loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+loopData2 <- colSums(EUK.GC1[loopASVs,])
+loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
+
+year1 <- 1950-ages$mean[match(names(loopData1),ages$ID2)]
+value1 <- as.numeric(loopData1)
+year2 <- 1950-ages$mean[match(names(loopData2),ages$ID2)]
+value2 <- as.numeric(loopData2)
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/composite/p.periphyllaDNA.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(year1,value1,pch=16,col="slateblue",ylim=c(0,8),
+     xlim=c(-1550,2000),bty = 'n',xaxt="n",yaxt='n',ylab="P.periphylla DetectionProp",xlab="",col.lab ="navyblue")
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
+axis(1,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
+points(year2,value2,pch=16,col="lightblue4")
+abline(h=4,lty=2,col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+
+
+
+
+pdf(paste0("figures/SpecificTaxa/EUK.",taxa,".pdf"),height=7,width = 9)
+par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
+plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
+dev.off()
+
+
+
+
+
+
 
 
 #### workshop 
@@ -1379,6 +1532,21 @@ plot(ages$median[match(colnames(MAM.P19.nREPS[c(10,169,230,293,336,392,490,491,5
 summary(test)
 plot(test)
 
+ASV <-838
+
+plot(1950-ages$median[match(colnames(EUK.P19.nREPS[ASV,]),ages$ID2)],jitter(as.numeric(EUK.P19.nREPS[ASV,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+plot(1950-ages$median[match(colnames(EUK.GC1.nREPS[ASV,]),ages$ID2)],jitter(as.numeric(EUK.GC1.nREPS[ASV,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+
+
+
+plot(1950-ages$median[match(colnames(EUK.P19.nREPS[168,]),ages$ID2)],jitter(as.numeric(EUK.P19.nREPS[168,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+plot(1950-ages$median[match(colnames(EUK.P19.nREPS[776,]),ages$ID2)],jitter(as.numeric(EUK.P19.nREPS[776,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+plot(1950-ages$median[match(colnames(EUK.P19.nREPS[838,]),ages$ID2)],jitter(as.numeric(EUK.P19.nREPS[838,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+plot(1950-ages$median[match(colnames(EUK.P19.nREPS[1022,]),ages$ID2)],jitter(as.numeric(EUK.P19.nREPS[1022,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+plot(1950-ages$median[match(colnames(EUK.P19.nREPS[3101,]),ages$ID2)],jitter(as.numeric(EUK.P19.nREPS[3101,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+plot(1950-ages$median[match(colnames(EUK.P19.nREPS[4881,]),ages$ID2)],jitter(as.numeric(EUK.P19.nREPS[4881,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive",xlim=c(-1550,2000))
+
+
 
 pdf("figures/MAM.ASV2.pdf",width = 6,height = 6)
 plot(ages$median[match(colnames(MAM.P19.nREPS[2,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[2,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
@@ -1391,6 +1559,8 @@ dev.off()
 pdf("figures/MAM.ASV25.pdf",width = 6,height = 6)
 plot(ages$median[match(colnames(MAM.P19.nREPS[25,]),ages$ID2)],jitter(as.numeric(MAM.P19.nREPS[4,])),pch=16,xlab="Cal Yr BP",ylab="replicates +ive")
 dev.off()
+
+ASV_838
 
 
 ## whale GLM

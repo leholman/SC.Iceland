@@ -402,20 +402,48 @@ pop <- read.csv("rawdata/human/settlement.csv")
 
        
 
-pdf("figures/composite/HumanPOP.pdf",height=4,width=10)
+pdf("figures/composite/HumanPOP.pdf",height=2.5,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(pop$Date,pop$Population,
      xlim=c(-1550,2000),
       bty = 'n',xaxt='n',yaxt="n",ylab="",xlab="",
      type="l",lwd=3,col="orange")
 mtext("Iceland Human Population", side = 4, line = 3,col="orange")
-axis(4,at=c(0,50000,100000,150000,200000,250000))
+axis(4,at=c(0,50000,100000,150000,200000,250000),las=2,cex.axis=0.6)
 axis(3,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
 dev.off()
 
 
 
+### what about hcnage sint he trophic level?
+
+troph <- read.csv("rawdata/human/FishIsotopes.csv")
+troph <- troph[troph$Species=="cod",]
+
+value <- troph$N
+year <- troph$MiddleDate
+
+gam1 <- gam(value ~ s(year,k=7), method = "REML")
+plot(gam1)
+
+max(year)
+min(year)
+
+prediction <- data.frame("year"=970:2021)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
 
-
+pdf("figures/composite/codN.pdf",height=3,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(troph$MiddleDate,troph$N,pch=16,xlim=c(-1550,2000),
+     col="lightblue",
+     bty = 'n',xaxt='n',yaxt="n",ylab="",xlab="",
+     ylim=c(12,15))
+axis(4,at=c(12,13,14,15))
+mtext(bquote("Atlantic Cod " ~ delta^15 * N), side = 4, line = 3, col = "cadetblue4")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
 
