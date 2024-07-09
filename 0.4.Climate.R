@@ -75,6 +75,7 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      xlab="",
      col=add.alpha('lightgreen',0.3),
      xlim=c(-1550,2000),
+     ylim = rev(range(climate$value[climate$record==subset])),
      xaxt = 'n', bty = 'n',
      yaxt ="n",ylab="")
 axis(4,at=c(1.5,2,2.5,3))
@@ -134,6 +135,7 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      xlab="",
      col=add.alpha('green3',0.3),
      xlim=c(-1550,2000),
+     ylim = rev(range(climate$value[climate$record==subset])),
      xaxt = 'n', bty = 'n',
      yaxt ="n",ylab="")
 axis(4,at=c(3,3.5,4))
