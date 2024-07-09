@@ -513,9 +513,11 @@ for (num in 0:7){
 #PC19
 #GC1
 
-
-
 ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19.avr.filt)),ages$ID2)]
+
+
+
+
 
 ## GC1
 ## calc raw richness 
@@ -1661,6 +1663,39 @@ points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
 polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
 points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
 dev.off()
+
+### lets compare to climate
+names(loopData1)
+
+plot(loopData1,climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],pch=16)
+plot(loopData1,climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],pch=16)
+plot(jitter(loopData1),
+     (climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2,pch=16,col="navyblue")
+
+points(jitter(loopData2),
+     (climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)])/2,pch=16,col="cadetblue4")
+
+abline(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2 ~ loopData1),col="navyblue",lwd=2)
+abline(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)])/2 ~ loopData2),col="cadetblue4",lwd=2)
+
+summary(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2 ~ loopData1))
+summary(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)])/2 ~ loopData2))
+
+
+
+y <- (climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2
+x <- loopData1
+
+x2 <- x [y<8.3]
+y2 <- y[y<8.3]
+
+
+plot(x,y)
+plot(x2,y2)
+
+summary(lm(y ~ x ))
+summary(lm(y2~x2))
+
 
 ## strange jellyfish
 
