@@ -414,7 +414,6 @@ axis(3,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE",
 dev.off()
 
 
-
 ### what about hcnage sint he trophic level?
 
 troph <- read.csv("rawdata/human/FishIsotopes.csv")

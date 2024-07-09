@@ -28,16 +28,16 @@ basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE)+
   annotation_north_arrow(location = "tr", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
 dev.off()
 
-pdf("Maps/OverviewV1mini.pdf",height = 2.5,width = 4.5)
+pdf("Maps/OverviewV1mini.pdf",height = 2.5,width = 3.5)
 basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE,legends = FALSE)+
   #basemap(limits = c(-25, -12, 63, 67),rotate = TRUE)+
   ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("black"),crs = 4326,cex=4.5)+
-  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("dodgerblue","darkred"),crs = 4326,cex=4)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("#52868B","#282E69"),crs = 4326,cex=4)+
   ggspatial::geom_spatial_text(aes(x = Lon, y = Lat+0.3,label=CoreID),data = metadata,cex=3)+
   xlab("")+
-  ylab("")
-  #annotation_scale(location = "bl")+ 
-  #annotation_north_arrow(location = "tr", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
+  ylab("")+
+  annotation_scale(location = "br")+ 
+  annotation_north_arrow(location = "tr", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
 dev.off()
 
 

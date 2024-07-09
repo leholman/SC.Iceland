@@ -1,35 +1,64 @@
-﻿Date,Population,Source,Notes
-870,0,NA,
-965,60000,"Table 1, https://doi.org/10.2307/2173366",midpoint of 50-104k
-1100,77000,"Table 1, https://doi.org/10.2307/2173366",midpoint of 72k-95k
-1311,83500,"Table 1, https://doi.org/10.2307/2173366",
-1402,120000,"Table 1, https://doi.org/10.2307/2173366",
-1404,40000,"Table 1, https://doi.org/10.2307/2173366",
-1703,50358,Statistics Iceland,
-1740,45022,Statistics Iceland,
-1750,48241,Statistics Iceland,
-1760,43716,Statistics Iceland,
-1770,47361,Statistics Iceland,
-1780,50630,Statistics Iceland,
-1790,40051,Statistics Iceland,
-1800,46176,Statistics Iceland,
-1810,48271,Statistics Iceland,
-1820,47994,Statistics Iceland,
-1830,51403,Statistics Iceland,
-1840,56893,Statistics Iceland,
-1850,59586,Statistics Iceland,
-1860,67754,Statistics Iceland,
-1870,69463,Statistics Iceland,
-1880,71981,Statistics Iceland,
-1890,70581,Statistics Iceland,
-1900,77967,Statistics Iceland,
-1910,84528,Statistics Iceland,
-1920,92855,Statistics Iceland,
-1930,106360,Statistics Iceland,
-1940,120264,Statistics Iceland,
-1950,141042,Statistics Iceland,
-1960,173855,Statistics Iceland,
-1970,204042,Statistics Iceland,
-1980,226948,Statistics Iceland,
-1990,253785,Statistics Iceland,
-2000,279049,Statistics Iceland,
+﻿Date,Population,Source
+870,0,NA
+1100,40000,978-9935-23-201-4 
+1400,80000,978-9935-23-201-4 
+1405,20000,978-9935-23-201-4 
+1520,25000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1680,65000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1681,64363,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1682,63727,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1683,63090,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1684,62454,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1685,61817,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1686,61180,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1687,60544,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1688,59907,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1689,59271,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1690,58634,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1691,57997,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1692,57361,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1693,56724,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1694,56087,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1695,55451,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1696,54814,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1697,54178,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1698,53541,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1699,52904,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1700,52268,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1701,51631,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1702,50995,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1703,50358,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1707,37000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1751,49000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1758,43000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1762,44800,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1769,46200,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1783,50121,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1785,40600,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1790,46000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1801,47240,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1810,49000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1815,50000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1822,52000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1830,54000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1835,56000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1840,57100,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1845,58600,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1850,59200,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1855,64600,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1860,67000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1864,68000,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1870,69800,https://www.researchgate.net/publication/367046961_HolmNicholls2021FishingAtTheEdgeOfExistence
+1880,71981,Statistics Iceland
+1890,70581,Statistics Iceland
+1900,77967,Statistics Iceland
+1910,84528,Statistics Iceland
+1920,92855,Statistics Iceland
+1930,106360,Statistics Iceland
+1940,120264,Statistics Iceland
+1950,141042,Statistics Iceland
+1960,173855,Statistics Iceland
+1970,204042,Statistics Iceland
+1980,226948,Statistics Iceland
+1990,253785,Statistics Iceland
+2000,279049,Statistics Iceland

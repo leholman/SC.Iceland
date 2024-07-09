@@ -11,13 +11,6 @@ library("mgcv")
 library("Biostrings")
 library("seqinr")
 
-#### WAVELET STUFF
-#xwt {biwavelet}
-
-
-
-
-
 ####====0.2 Functions====####
 NrepsMaker <- function(INdataframe,vector){
   ##write these checks
@@ -196,6 +189,8 @@ EUK.P19.avr <- average_by_reps(prop.table(as.matrix(EUK.P19),2),gsub("(.*)_[0-9]
 EUK.P19.bin <- make_binary(EUK.P19,1)
 EUK.P19.ages <- ages$median[match(colnames(EUK.P19.avr),ages$ID2)]
 
+#make subsets per taxonomic group
+##P19
 EUK.p19.avr.bac <- EUK.P19.avr[match(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80],EUK.tax.PR2$X.1),]
 row.names(EUK.p19.avr.bac) <- EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80]
 
@@ -205,8 +200,15 @@ row.names(EUK.p19.avr.met) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Subdivision=="
 EUK.p19.avr.pro <- EUK.P19.avr[match(na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80]),EUK.tax.PR2$X.1),]
 row.names(EUK.p19.avr.pro) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80])
 
+#GC1
+EUK.GC1.avr.bac <- EUK.GC1.avr[match(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80],EUK.tax.PR2$X.1),]
+row.names(EUK.GC1.avr.bac) <- EUK.tax.PR2$X.1[EUK.tax.PR2$Domain=="Bacteria" & EUK.tax.PR2$Domain.1>80]
 
+EUK.GC1.avr.met <- EUK.GC1.avr[match(na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Subdivision=="Metazoa" & EUK.tax.PR2$Subdivision>80]),EUK.tax.PR2$X.1),]
+row.names(EUK.GC1.avr.met) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Subdivision=="Metazoa" & EUK.tax.PR2$Subdivision>80])
 
+EUK.GC1.avr.pro <- EUK.GC1.avr[match(na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80]),EUK.tax.PR2$X.1),]
+row.names(EUK.GC1.avr.pro) <- na.omit(EUK.tax.PR2$X.1[EUK.tax.PR2$Domain!="Bacteria" & EUK.tax.PR2$Subdivision!="Metazoa" & EUK.tax.PR2$Subdivision!="Fungi" & EUK.tax.PR2$Subdivision>80])
 
 
 
@@ -287,6 +289,234 @@ dev.off()
 
 
 ####====2.0 Alpha Diversity====####
+
+## total richness
+
+#PC19
+EUK.P19.avr.filt <- EUK.P19.avr
+#EUK.P19.avr.filt[EUK.P19.nREPS < 2] <- 0
+EUK.P19.richness <- colSums(make_binary(EUK.P19.avr.filt*1000000000000,2))
+#GC1
+EUK.GC1.avr.filt <- EUK.GC1.avr
+#EUK.GC1.avr.filt[EUK.GC1.nREPS < 2] <- 0
+EUK.GC1.richness <- colSums(make_binary(EUK.GC1.avr.filt*1000000000000,2))
+
+
+### plot
+year1 <- 1950-ages$mean[match(names(EUK.P19.richness),ages$ID2)]
+value1 <- EUK.P19.richness
+year2 <- 1950-ages$mean[match(names(EUK.GC1.richness),ages$ID2)]
+value2 <- EUK.GC1.richness
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/EUK.richness.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(1950-ages$mean[match(names(EUK.P19.richness),ages$ID2)],
+     EUK.P19.richness,
+     xlim=c(-1550,2000),bty = 'n',ylab="ASV richness",xlab="Year",
+     pch=16,col="slateblue")
+points(1950-ages$mean[match(names(EUK.GC1.richness),ages$ID2)],
+       EUK.GC1.richness,
+       pch=16,col="lightblue4")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+
+## subset richness
+
+#Metazoa
+
+
+#PC19
+EUK.P19.avr.met.filt <- EUK.p19.avr.met
+#EUK.P19.avr.filt[EUK.P19.nREPS < 2] <- 0
+EUK.P19.met.richness <- colSums(make_binary(EUK.P19.avr.met.filt*1000000000000,2))
+#GC1
+EUK.GC1.avr.met.filt <- EUK.GC1.avr.met
+#EUK.GC1.avr.filt[EUK.GC1.nREPS < 2] <- 0
+EUK.GC1.met.richness <- colSums(make_binary(EUK.GC1.avr.met.filt*1000000000000,2))
+
+
+### plot
+year1 <- 1950-ages$mean[match(names(EUK.P19.met.richness),ages$ID2)]
+value1 <- EUK.P19.met.richness
+year2 <- 1950-ages$mean[match(names(EUK.GC1.met.richness),ages$ID2)]
+value2 <- EUK.GC1.met.richness
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/EUK.met.richness.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(1950-ages$mean[match(names(EUK.P19.met.richness),ages$ID2)],
+     EUK.P19.met.richness,
+     xlim=c(-1550,2000),bty = 'n',ylab="ASV richness",xlab="Year",
+     pch=16,col="slateblue")
+points(1950-ages$mean[match(names(EUK.GC1.met.richness),ages$ID2)],
+       EUK.GC1.met.richness,
+       pch=16,col="lightblue4")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+#protists
+
+#PC19
+EUK.P19.avr.pro.filt <- EUK.p19.avr.pro
+#EUK.P19.avr.filt[EUK.P19.nREPS < 2] <- 0
+EUK.P19.pro.richness <- colSums(make_binary(EUK.P19.avr.pro.filt*1000000000000,2))
+#GC1
+EUK.GC1.avr.pro.filt <- EUK.GC1.avr.pro
+#EUK.GC1.avr.filt[EUK.GC1.nREPS < 2] <- 0
+EUK.GC1.pro.richness <- colSums(make_binary(EUK.GC1.avr.pro.filt*1000000000000,2))
+
+
+### plot
+year1 <- 1950-ages$mean[match(names(EUK.P19.pro.richness),ages$ID2)]
+value1 <- EUK.P19.pro.richness
+year2 <- 1950-ages$mean[match(names(EUK.GC1.pro.richness),ages$ID2)]
+value2 <- EUK.GC1.pro.richness
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/EUK.pro.richness.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(1950-ages$mean[match(names(EUK.P19.pro.richness),ages$ID2)],
+     EUK.P19.pro.richness,
+     xlim=c(-1550,2000),bty = 'n',ylab="ASV richness",xlab="Year",
+     pch=16,col="slateblue")
+points(1950-ages$mean[match(names(EUK.GC1.pro.richness),ages$ID2)],
+       EUK.GC1.pro.richness,
+       pch=16,col="lightblue4")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+#bacteria
+
+#PC19
+EUK.P19.avr.bac.filt <- EUK.p19.avr.bac
+#EUK.P19.avr.filt[EUK.P19.nREPS < 2] <- 0
+EUK.P19.bac.richness <- colSums(make_binary(EUK.P19.avr.bac.filt*1000000000000,2))
+#GC1
+EUK.GC1.avr.bac.filt <- EUK.GC1.avr.bac
+#EUK.GC1.avr.filt[EUK.GC1.nREPS < 2] <- 0
+EUK.GC1.bac.richness <- colSums(make_binary(EUK.GC1.avr.bac.filt*1000000000000,2))
+
+
+### plot
+year1 <- 1950-ages$mean[match(names(EUK.P19.bac.richness),ages$ID2)]
+value1 <- EUK.P19.bac.richness
+year2 <- 1950-ages$mean[match(names(EUK.GC1.bac.richness),ages$ID2)]
+value2 <- EUK.GC1.bac.richness
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/EUK.bac.richness.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(1950-ages$mean[match(names(EUK.P19.bac.richness),ages$ID2)],
+     EUK.P19.bac.richness,
+     xlim=c(-1550,2000),bty = 'n',ylab="ASV richness",xlab="Year",
+     pch=16,col="slateblue",ylim=c(50,500))
+points(1950-ages$mean[match(names(EUK.GC1.bac.richness),ages$ID2)],
+       EUK.GC1.bac.richness,
+       pch=16,col="lightblue4")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+
+
+
+
+
+## subset richness @ 3 & 6 replicates 
+
+#PC19
+#GC1
+
+par(mfrow=c(4,2))
+for (num in 0:7){
+  EUK.P19.avr.filt <- EUK.P19.avr
+  EUK.P19.avr.filt[EUK.P19.nREPS < num] <- 0
+  plot(1950-ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19.avr.filt)),ages$ID2)],colSums(make_binary(EUK.P19.avr.filt*100000000000,1)),ylab="",xlab="")
+}
+
+
+## effect of normalisation
+
+#PC19
+#GC1
+
+
+
+ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19.avr.filt)),ages$ID2)]
+
 ## GC1
 ## calc raw richness 
 EUK.GC1.raw.richness <- colSums(make_binary(EUK.GC1,2))
