@@ -1426,6 +1426,9 @@ envfit(EUK.P19.nMDS.bac.j,datasetin)
 envfit(EUK.P19.MDS.bac.b ,datasetin)
 envfit(EUK.P19.MDS.bac.j ,datasetin)
 
+
+####====4.0 Specific taxa ====####
+
 ### lets make some fish plots 
 EUKtax.h <- read.csv("taxonomy/byHand/EUKtax_assigned1006.csv")
 
@@ -1470,106 +1473,6 @@ for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Order"])){
   dev.off()
 }
 
-### now some whale plots
-
-##RIZ
-RIZtax.h <- read.csv("taxonomy/byHand/RIZtax_assigned2105.csv")
-
-unique(RIZtax.h$ID[RIZtax.h$Level=="Family"])
-unique(RIZtax.h$ID[RIZtax.h$Level=="Genus"])
-unique(RIZtax.h$ID[RIZtax.h$Level=="Species" & RIZtax.h$X.1.base.in.difference=="Y"])
-
-
-for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Species" & RIZtax.h$X.1.base.in.difference=="Y"])){
-  loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
-  loopData1 <- colSums(RIZ.P19[loopASVs,])
-  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
-  loopData2 <- colSums(RIZ.GC1[loopASVs,])
-  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
-  pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
-  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  dev.off()
-}
-
-
-for (taxa in unique(RIZtax.h$ID[RIZtax.h$Level=="Genus"])){
-  loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
-  loopData1 <- colSums(RIZ.P19[loopASVs,])
-  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
-  loopData2 <- colSums(RIZ.GC1[loopASVs,])
-  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
-  pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
-  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  dev.off()
-}
-
-
-for (taxa in unique(RIZtax.h$Assignment[RIZtax.h$Level=="Family"])){
-  loopASVs <- RIZtax.h$OTU[RIZtax.h$ID==taxa]
-  loopData1 <- colSums(RIZ.P19[loopASVs,])
-  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
-  loopData2 <- colSums(RIZ.GC1[loopASVs,])
-  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
-  pdf(paste0("figures/SpecificTaxa/RIZ.",taxa,".pdf"),height=7,width = 9)
-  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  dev.off()
-}
-
-##MAM
-
-MAMtax.h <- read.csv("taxonomy/byHand/MAMtax_assigned2105.csv")
-
-unique(MAMtax.h$ID[MAMtax.h$Level=="Family"])
-unique(MAMtax.h$ID[MAMtax.h$Level=="Genus"])
-unique(MAMtax.h$ID[MAMtax.h$Level=="Species" & MAMtax.h$X.1.base.in.difference=="Y"])
-taxa <- "Cystophora cristata"
-
-for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Species" & MAMtax.h$X.1.base.in.difference=="Y"])){
-  loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
-  loopData1 <- colSums(MAM.P19[loopASVs,])
-  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
-  loopData2 <- colSums(MAM.GC1[loopASVs,])
-  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
-  pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
-  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Species:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  dev.off()
-}
-
-
-for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Genus"])){
-  loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
-  loopData1 <- colSums(MAM.P19[loopASVs,])
-  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
-  loopData2 <- colSums(MAM.GC1[loopASVs,])
-  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
-  pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
-  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  dev.off()
-}
-
-
-for (taxa in unique(MAMtax.h$ID[MAMtax.h$Level=="Family"])){
-  loopASVs <- MAMtax.h$OTU[MAMtax.h$ID==taxa]
-  loopData1 <- colSums(MAM.P19[loopASVs,])
-  loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
-  loopData2 <- colSums(MAM.GC1[loopASVs,])
-  loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
-  pdf(paste0("figures/SpecificTaxa/MAM.",taxa,".pdf"),height=7,width = 9)
-  par(mfrow=c(2,1),mar=c(4.1, 4.1, 1.1, 1.1))
-  plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData1)),main=paste0("PC19 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Family:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
-  dev.off()
-}
 
 ### Some plots for the composite plot 
 
@@ -1622,6 +1525,39 @@ plot(1950-ages$mean[match(names(loopData1),ages$ID2)],jitter(as.numeric(loopData
 plot(1950-ages$mean[match(names(loopData2),ages$ID2)],jitter(as.numeric(loopData2)),main=paste0("GC01 Genus:",taxa),pch=16,xlab="Year (CE)",ylab="replicates +ive",xlim=c(-1550,1700))
 dev.off()
 
+
+lmdata <- data.frame(detections=c(loopData1,loopData2),
+                     climate.TF=c(climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]),
+                     climate.AK=c(climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]),
+                     core=c(rep("PC19",length(loopData1)),rep("GC01",length(loopData2))))
+lmdata$climate <- (lmdata$climate.TF+lmdata$climate.AK)/2
+
+summary(lm(detections~climate*core,data=lmdata))
+lm1 <- lm(detections~climate*core,data=lmdata)
+
+prediction <- rbind(data.frame("climate"=seq(range(lmdata$climate[lmdata$core=="PC19"])[1],range(lmdata$climate[lmdata$core=="PC19"])[2],0.01),
+                               "core"=rep("PC19",length(seq(range(lmdata$climate[lmdata$core=="PC19"])[1],range(lmdata$climate[lmdata$core=="PC19"])[2],0.01)))),
+                    data.frame("climate"=seq(range(lmdata$climate[lmdata$core=="GC01"])[1],range(lmdata$climate[lmdata$core=="GC01"])[2],0.01),
+                               "core"=rep("GC01",length(seq(range(lmdata$climate[lmdata$core=="GC01"])[1],range(lmdata$climate[lmdata$core=="GC01"])[2],0.01)))))
+
+prediction <- cbind(prediction,predict(lm1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+pdf("figures/fig2/cod-SST.pdf",width = 4.5,height = 4)
+par(mar=c(4.1,4.1,2.1,2.1))
+palette(c("lightblue4","slateblue"))
+plot(lmdata$climate,jitter(lmdata$detections,amount = 0.1),pch=16,col=as.factor(lmdata$core),yaxt="n",ylab="Detection Proportion",xlab="Sea Surface temperature (°C)")
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1)
+#polygon(c(prediction$climate[prediction$core=="PC19"], rev(prediction$climate[prediction$core=="PC19"])), c(prediction$uppCI[prediction$core=="PC19"], rev(prediction$lwrCI[prediction$core=="PC19"])), col=add.alpha('mediumslateblue',0.3), border=NA)
+#points(prediction$climate[prediction$core=="PC19"],prediction$fit[prediction$core=="PC19"],type="l",col="navyblue",lwd=3)
+#polygon(c(prediction$climate[prediction$core=="GC01"], rev(prediction$climate[prediction$core=="GC01"])), c(prediction$uppCI[prediction$core=="GC01"], rev(prediction$lwrCI[prediction$core=="GC01"])), col=add.alpha('lightblue4',0.3), border=NA)
+#points(prediction$climate[prediction$core=="GC01"],prediction$fit[prediction$core=="GC01"],type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+
+
 ## now clupea
 taxa <- "Clupea"
 
@@ -1665,34 +1601,47 @@ points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
 dev.off()
 
 ### lets compare to climate
-names(loopData1)
 
-plot(loopData1,climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],pch=16)
-plot(loopData1,climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],pch=16)
-plot(jitter(loopData1),
-     (climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2,pch=16,col="navyblue")
+## first we make a dataset with all the observations
 
-points(jitter(loopData2),
-     (climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)])/2,pch=16,col="cadetblue4")
+lmdata <- data.frame(detections=c(loopData1,loopData2),
+                     climate.TF=c(climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]),
+                     climate.AK=c(climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]),
+                     core=c(rep("PC19",length(loopData1)),rep("GC01",length(loopData2))))
+lmdata$climate <- (lmdata$climate.TF+lmdata$climate.AK)/2
 
-abline(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2 ~ loopData1),col="navyblue",lwd=2)
-abline(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)])/2 ~ loopData2),col="cadetblue4",lwd=2)
+summary(lm(detections~climate*core,data=lmdata))
+lm1 <- lm(detections~climate*core,data=lmdata)
 
-summary(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2 ~ loopData1))
-summary(lm((climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)])/2 ~ loopData2))
+prediction <- rbind(data.frame("climate"=seq(range(lmdata$climate[lmdata$core=="PC19"])[1],range(lmdata$climate[lmdata$core=="PC19"])[2],0.01),
+                         "core"=rep("PC19",length(seq(range(lmdata$climate[lmdata$core=="PC19"])[1],range(lmdata$climate[lmdata$core=="PC19"])[2],0.01)))),
+                    data.frame("climate"=seq(range(lmdata$climate[lmdata$core=="GC01"])[1],range(lmdata$climate[lmdata$core=="GC01"])[2],0.01),
+                               "core"=rep("GC01",length(seq(range(lmdata$climate[lmdata$core=="GC01"])[1],range(lmdata$climate[lmdata$core=="GC01"])[2],0.01)))))
+
+prediction <- cbind(prediction,predict(lm1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+pdf("figures/fig2/herring-SST.pdf",width = 4.5,height = 4)
+par(mar=c(4.1,4.1,2.1,2.1))
+palette(c("lightblue4","slateblue"))
+plot(lmdata$climate,jitter(lmdata$detections,amount = 0.1),pch=16,col=as.factor(lmdata$core),yaxt="n",ylab="Detection Proportion",xlab="Sea Surface temperature (°C)")
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1)
+polygon(c(prediction$climate[prediction$core=="PC19"], rev(prediction$climate[prediction$core=="PC19"])), c(prediction$uppCI[prediction$core=="PC19"], rev(prediction$lwrCI[prediction$core=="PC19"])), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$climate[prediction$core=="PC19"],prediction$fit[prediction$core=="PC19"],type="l",col="navyblue",lwd=3)
+polygon(c(prediction$climate[prediction$core=="GC01"], rev(prediction$climate[prediction$core=="GC01"])), c(prediction$uppCI[prediction$core=="GC01"], rev(prediction$lwrCI[prediction$core=="GC01"])), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction$climate[prediction$core=="GC01"],prediction$fit[prediction$core=="GC01"],type="l",col="cadetblue4",lwd=3)
+dev.off()
 
 
 
+## What about taking out these large values?
 y <- (climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)]+climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)])/2
 x <- loopData1
-
 x2 <- x [y<8.3]
 y2 <- y[y<8.3]
-
-
 plot(x,y)
 plot(x2,y2)
-
 summary(lm(y ~ x ))
 summary(lm(y2~x2))
 
@@ -1730,6 +1679,48 @@ pdf("figures/composite/p.periphyllaDNA.pdf",height=4,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(year1,value1,pch=16,col="slateblue",ylim=c(0,8),
      xlim=c(-1550,2000),bty = 'n',xaxt="n",yaxt='n',ylab="P.periphylla DetectionProp",xlab="",col.lab ="navyblue")
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
+axis(1,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
+points(year2,value2,pch=16,col="lightblue4")
+abline(h=4,lty=2,col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+## taxa
+loopASVs <- 10782
+
+loopData1 <- colSums(EUK.P19[loopASVs,])
+loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+loopData2 <- colSums(EUK.GC1[loopASVs,])
+loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
+
+year1 <- 1950-ages$mean[match(names(loopData1),ages$ID2)]
+value1 <- as.numeric(loopData1)
+year2 <- 1950-ages$mean[match(names(loopData2),ages$ID2)]
+value2 <- as.numeric(loopData2)
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=-1103:1725)
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/ChosenTaxa/Metridia.pdf",height=4,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(year1,value1,pch=16,col="slateblue",ylim=c(0,8),
+     xlim=c(-1550,2000),bty = 'n',xaxt="n",yaxt='n',ylab="DetectionProp",xlab="",col.lab ="navyblue")
 axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
 axis(1,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
 points(year2,value2,pch=16,col="lightblue4")

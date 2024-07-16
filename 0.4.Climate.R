@@ -404,15 +404,16 @@ pop <- read.csv("rawdata/human/settlement.csv")
 
        
 
-pdf("figures/composite/HumanPOP.pdf",height=2.5,width=10)
+pdf("figures/composite/HumanPOP.pdf",height=2.8,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(pop$Date,pop$Population,
+     ylim=c(0,310000),
      xlim=c(-1550,2000),
       bty = 'n',xaxt='n',yaxt="n",ylab="",xlab="",
      type="l",lwd=3,col="orange")
-mtext("Iceland Human Population", side = 4, line = 3,col="orange")
-axis(4,at=c(0,50000,100000,150000,200000,250000),las=2,cex.axis=0.6)
-axis(3,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
+mtext("Iceland Human Population", side = 4, line = 4,col="orange")
+axis(4,at=c(0,50000,100000,150000,200000,250000,300000),las=2,cex.axis=0.8)
+axis(1,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
 dev.off()
 
 
