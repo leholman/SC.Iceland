@@ -1,0 +1,3 @@
+### here we are using vsearch to search against a curated PR2 db - 10.5281/zenodo.3768950
+
+./vsearch-2.28.1-macos-aarch64/bin/vsearch --usearch_global EUK.cleaned.fasta --db database.fasta  --iddef 1 --userout alnout.txt -userfields query+target+id --maxaccepts 0 --query_cov 0.9 --id 0.85 --maxhits 20

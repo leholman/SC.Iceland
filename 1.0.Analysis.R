@@ -170,6 +170,7 @@ add.alpha <- function(col, alpha=1){
 ages <- read.csv("metadata/AgeOut.csv")
 ages$ID2 <- gsub("-","_",ages$ID)
 EUK.tax.PR2 <- read.csv("taxonomy/EUK.cleaned.PR2.csv",row.names = 1)
+EUK.tax.PR2.cat <- read.csv("taxonomy/functionalAnno/EUK.cleaned.PR2.cat.csv",row.names = 1)
 climate <- read.csv("metadata/climate.csv",row.names = 1)
 
 
@@ -270,6 +271,25 @@ legend(56,1,rev(rownames(EUK.GC1.tax.c)),fill=getPalette(dim(EUK.GC1.tax.c)[1]),
 dev.off()
 
 
+#GC1 cat
+EUK.GC1.tax.a <- minAbundance(CountTable(as.character(EUK.tax.PR2.cat$cat),EUK.GC1.avr,output = "Abundance"),minAbun=0.01)
+EUK.GC1.tax.c <- minAbundance(CountTable(as.character(EUK.tax.PR2.cat$cat),EUK.GC1.avr,output = "Count"),minAbun=0.01)
+EUK.GC1.tax.a <- as.matrix(prop.table(as.matrix(EUK.GC1.tax.a[,order(ages$median[match(colnames(EUK.GC1.tax.a),ages$ID2)])]),margin = 2))
+EUK.GC1.tax.c <- as.matrix(prop.table(as.matrix(EUK.GC1.tax.c[,order(ages$median[match(colnames(EUK.GC1.tax.c),ages$ID2)])]),margin = 2))
+barplot(EUK.GC1.tax.a,col=rev(getPalette(dim(EUK.GC1.tax.a)[1])))
+barplot(EUK.GC1.tax.c,col=rev(getPalette(dim(EUK.GC1.tax.c)[1])))
+
+pdf("figures/EUK.GC1.tax.cat.pdf",width = 12,height = 9)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
+barplot(EUK.GC1.tax.a,las=2,cex.names=0.6,col=rev(getPalette(dim(EUK.GC1.tax.a)[1])),ylab="Read Abundance",names.arg=ages$median[match(colnames(EUK.GC1.tax.a),ages$ID2)])
+legend(56,1,rev(rownames(EUK.GC1.tax.a)),fill=getPalette(dim(EUK.GC1.tax.a)[1]),cex=0.5,bty = "n",y.intersp=0.75)
+barplot(EUK.GC1.tax.c,las=2,cex.names=0.6,col=rev(getPalette(dim(EUK.GC1.tax.c)[1])),ylab="ASV Counts",names.arg=ages$median[match(colnames(EUK.GC1.tax.c),ages$ID2)])
+legend(56,1,rev(rownames(EUK.GC1.tax.c)),fill=getPalette(dim(EUK.GC1.tax.c)[1]),cex=0.5,bty = "n",y.intersp=0.75)
+dev.off()
+
+
+
+
 
 ##PC19
 EUK.P19.tax.a <- minAbundance(CountTable(as.character(EUK.tax.PR2$Family),EUK.P19.avr,output = "Abundance"),minAbun=0.01)
@@ -288,6 +308,45 @@ legend(190,1,rev(rownames(EUK.P19.tax.c)),fill=getPalette(dim(EUK.P19.tax.c)[1])
 dev.off()
 
 
+##PC19 cat
+EUK.P19.tax.a <- minAbundance(CountTable(as.character(EUK.tax.PR2.cat$cat),EUK.P19.avr,output = "Abundance"),minAbun=0.01)
+EUK.P19.tax.c <- minAbundance(CountTable(as.character(EUK.tax.PR2.cat$cat),EUK.P19.avr,output = "Count"),minAbun=0.01)
+EUK.P19.tax.a <- as.matrix(prop.table(as.matrix(EUK.P19.tax.a[,order(ages$median[match(colnames(EUK.P19.tax.a),ages$ID2)])]),margin = 2))
+EUK.P19.tax.c <- as.matrix(prop.table(as.matrix(EUK.P19.tax.c[,order(ages$median[match(colnames(EUK.P19.tax.c),ages$ID2)])]),margin = 2))
+
+pdf("figures/EUK.P19.tax.cat.pdf",width = 12,height = 9)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
+barplot(EUK.P19.tax.a,las=2,cex.names=0.6,col=rev(getPalette(dim(EUK.P19.tax.a)[1])),ylab="Read Abundance",names.arg=1950-ages$mean[match(colnames(EUK.P19.tax.a),ages$ID2)])
+legend(190,1,rev(rownames(EUK.P19.tax.a)),fill=getPalette(dim(EUK.P19.tax.a)[1]),cex=0.5,bty = "n",y.intersp=0.75)
+barplot(EUK.P19.tax.c,las=2,cex.names=0.6,col=rev(getPalette(dim(EUK.P19.tax.c)[1])),ylab="ASV Counts",names.arg=1950-ages$median[match(colnames(EUK.P19.tax.c),ages$ID2)])
+legend(190,1,rev(rownames(EUK.P19.tax.c)),fill=getPalette(dim(EUK.P19.tax.c)[1]),cex=0.5,bty = "n",y.intersp=0.75)
+dev.off()
+
+
+#Both
+unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.a), rownames(EUK.GC1.tax.a))))
+
+taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
+
+
+EUK.P19.tax.a <- EUK.P19.tax.a[order(rownames(EUK.P19.tax.a)),]
+EUK.GC1.tax.a <- EUK.GC1.tax.a[order(rownames(EUK.GC1.tax.a)),]
+
+pdf("figures/EUK.tax.cat.pdf",width = 12,height = 9)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
+barplot(EUK.P19.tax.a,las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.P19.tax.a)],ylab="Read Abundance",names.arg=1950-ages$mean[match(colnames(EUK.P19.tax.a),ages$ID2)],border = NA,ylim=c(1,0),yaxt="n")
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+#legend(190,0.2,unique_taxa,fill=taxa_colors[unique_taxa],cex=0.5,bty = "n",y.intersp=0.75, xpd = TRUE,inset = c(-0.25, 0))
+barplot(EUK.GC1.tax.a,las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.GC1.tax.a)],ylab="Read Abundance",names.arg=1950-ages$mean[match(colnames(EUK.GC1.tax.a),ages$ID2)],border = NA,ylim=c(1,0),yaxt="n")
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+par(mfrow=c(1, 1))
+legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.7,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+dev.off()
+
+
+                        
+                        
+                        
 ####====2.0 Alpha Diversity====####
 
 ## total richness
