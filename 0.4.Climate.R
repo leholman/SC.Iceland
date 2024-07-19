@@ -69,7 +69,7 @@ dev.off()
 colnames(prediction2) <- c("year","d13C.GAM.fit","d13C.GAM.fit.se","d13C.GAM.fit.uppCI","d13C.GAM.fit.lwrCI","d13C.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
 
-pdf("figures/composite/d13C.pdf",height=4,width =10)
+pdf("figures/fig1/d13C.pdf",height=4,width =10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="",
@@ -129,7 +129,7 @@ colnames(prediction2) <- c("year","d18O.GAM.fit","d18O.GAM.fit.se","d18O.GAM.fit
 climatedat <- cbind(climatedat,prediction2)
 
 
-pdf("figures/composite/d18O.pdf",height=4,width =10)
+pdf("figures/fig1/d18O.pdf",height=4,width =10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="",
@@ -240,7 +240,7 @@ dev.off()
 colnames(prediction2) <- c("yearCE","yearBP","MD99-2275sstAlkenone.GAM.fit","MD99-2275sstAlkenone.GAM.fit.se","MD99-2275sstAlkenone.GAM.fit.uppCI","MD99-2275sstAlkenone.GAM.fit.lwrCI","MD99-2275sstAlkenone.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
 
-pdf("figures/composite/MD99Alkenone.pdf",height=4,width =10)
+pdf("figures/fig1/MD99Alkenone.pdf",height=4,width =10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(1950-climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="",
@@ -306,7 +306,7 @@ dev.off()
 colnames(prediction2) <- c("yearCE","yearBP","MD99-2275sstDiatom.GAM.fit","MD99-2275sstDiatom.GAM.fit.se","MD99-2275sstDiatom.GAM.fit.uppCI","MD99-2275sstDiatom.GAM.fit.lwrCI","MD99-2275sstDiatom.100yrspline")
 climatedat <- cbind(climatedat,prediction2)
 
-pdf("figures/composite/MD99DiatomTF.pdf",height=4,width =10)
+pdf("figures/fig1/MD99DiatomTF.pdf",height=4,width =10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(1950-climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="",
@@ -375,7 +375,7 @@ climatedat <- cbind(climatedat,prediction2)
 
 
 
-pdf("figures/composite/MD99-2275IP25.pdf",height=4,width=10)
+pdf("figures/fig1/MD99-2275IP25.pdf",height=4,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(climate$year[climate$record==subset],climate$value[climate$record==subset],pch=16,
      xlab="",
@@ -404,7 +404,7 @@ pop <- read.csv("rawdata/human/settlement.csv")
 
        
 
-pdf("figures/composite/HumanPOP.pdf",height=2.8,width=10)
+pdf("figures/Fig1//HumanPOP.pdf",height=2.8,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(pop$Date,pop$Population,
      ylim=c(0,310000),
@@ -437,7 +437,7 @@ prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
 
-pdf("figures/composite/codN.pdf",height=3,width=10)
+pdf("figures/fig1/codN.pdf",height=3,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(troph$MiddleDate,troph$N,pch=16,xlim=c(-1550,2000),
      col="lightblue",
