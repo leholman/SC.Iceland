@@ -165,6 +165,25 @@ add.alpha <- function(col, alpha=1){
 }
 
 
+# Here is a function to create labels from dates in numeric form such that +ive numbers give CE and -ive numbers give BCE 
+number_to_CE_label <- function(numbers) {
+  # Create an empty character vector to store the labels
+  labels <- character(length(numbers))
+  
+  # Loop through each number in the vector
+  for (i in seq_along(numbers)) {
+    if (numbers[i] >= 0) {
+      labels[i] <- paste(numbers[i], "CE")
+    } else {
+      labels[i] <- paste(abs(numbers[i]), "BCE")
+    }
+  }
+  
+  return(labels)
+}
+
+
+
 
 ####====0.3 Data Prep====####
 ages <- read.csv("metadata/AgeOut.csv")
@@ -334,19 +353,39 @@ EUK.GC1.tax.a <- EUK.GC1.tax.a[order(rownames(EUK.GC1.tax.a)),]
 
 pdf("figures/EUK.tax.cat.pdf",width = 12,height = 9)
 par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
-barplot(EUK.P19.tax.a,las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.P19.tax.a)],ylab="Read Abundance",names.arg=1950-ages$mean[match(colnames(EUK.P19.tax.a),ages$ID2)],border = NA,ylim=c(1,0),yaxt="n")
+barplot(EUK.P19.tax.a[,dim(EUK.P19.tax.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.P19.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.P19.tax.a),ages$ID2)])))
 axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
 #legend(190,0.2,unique_taxa,fill=taxa_colors[unique_taxa],cex=0.5,bty = "n",y.intersp=0.75, xpd = TRUE,inset = c(-0.25, 0))
-barplot(EUK.GC1.tax.a,las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.GC1.tax.a)],ylab="Read Abundance",names.arg=1950-ages$mean[match(colnames(EUK.GC1.tax.a),ages$ID2)],border = NA,ylim=c(1,0),yaxt="n")
+barplot(EUK.GC1.tax.a[,dim(EUK.GC1.tax.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.GC1.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.GC1.tax.a),ages$ID2)])))
 axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
 par(mfrow=c(1, 1))
 legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.7,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
 dev.off()
 
 
-                        
-                        
-                        
+#### Lets produce some stats about the first ASV
+
+sum(EUK.P19[1,],EUK.GC1[1,])
+
+
+pdf("figures/EUK.ASV1.pdf",width = 9,height = 7)
+plot(1950-ages$mean[match(names(EUK.P19.avr),ages$ID2)],EUK.P19.avr[1,],pch=16,ylab="Propotion of reads",xlab="Year",xaxt = "n",xlim=c(-1600,2000),ylim=c(0,1),col="navyblue")
+axis(1,at=seq(-1500,2000,500),labels = number_to_CE_label(seq(-1500,2000,500)))
+points(1950-ages$mean[match(names(EUK.GC1.avr),ages$ID2)],EUK.GC1.avr[1,],pch=16,col="cadetblue4")
+dev.off()
+
+
+
+pdf("figures/EUK.ASV1.pdf",width = 9,height = 7)
+plot(1950-ages$mean[match(names(EUK.P19.avr),ages$ID2)],EUK.P19.avr[227,],pch=16,ylab="Propotion of reads",xlab="Year",xaxt = "n",xlim=c(-1600,2000),col="navyblue")
+axis(1,at=seq(-1500,2000,500),labels = number_to_CE_label(seq(-1500,2000,500)))
+points(1950-ages$mean[match(names(EUK.GC1.avr),ages$ID2)],EUK.GC1.avr[227,],pch=16,col="cadetblue4")
+dev.off()
+
+
+
 ####====2.0 Alpha Diversity====####
 
 ## total richness
@@ -550,21 +589,27 @@ dev.off()
 
 
 
-
-
-
-
 ## subset richness @ 3 & 6 replicates 
 
 #PC19
-#GC1
 
 par(mfrow=c(4,2))
 for (num in 0:7){
   EUK.P19.avr.filt <- EUK.P19.avr
   EUK.P19.avr.filt[EUK.P19.nREPS < num] <- 0
-  plot(1950-ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19.avr.filt)),ages$ID2)],colSums(make_binary(EUK.P19.avr.filt*100000000000,1)),ylab="",xlab="")
+  plot(1950-ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.P19.avr.filt)),ages$ID2)],colSums(make_binary(EUK.P19.avr.filt*100000000000,1)),ylab="",xlab="",pch=16,main=paste0("> ",num," +ive reps"))
 }
+
+
+#GC1
+par(mfrow=c(4,2))
+for (num in 0:7){
+  EUK.GC1.avr.filt <- EUK.GC1.avr
+  EUK.GC1.avr.filt[EUK.GC1.nREPS < num] <- 0
+  plot(1950-ages$median[match(gsub("(.*)_[0-9]$","\\1",colnames(EUK.GC1.avr.filt)),ages$ID2)],colSums(make_binary(EUK.GC1.avr.filt*100000000000,1)),ylab="",xlab="",pch=16,main=paste0("> ",num," +ive reps"))
+}
+
+
 
 
 ## effect of normalisation

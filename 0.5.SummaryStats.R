@@ -117,3 +117,10 @@ length(na.omit(unique(tax.subset.euk$Family[tax.subset.euk$Family.1>80])))
 length(na.omit(unique(tax.subset.euk$Genus[tax.subset.euk$Genus.1>80])))
 
 ### NCBI assignments
+
+tax.ncbi <- read.csv("taxonomy/EUK.combined.parsed.csv",row.names = 1)
+tax.ncbi.high <- tax.ncbi[tax.ncbi$assignmentQual=="High" | tax.ncbi$assignmentQual=="High-MH" | tax.ncbi$assignmentQual=="High-MH-S",]
+tax.ncbi.high.genera <- unique(tax.ncbi.high$genus) 
+tax.ncbi.high.genera2 <- tax.ncbi.high.genera[!(is.na(tax.ncbi.high.genera) | tax.ncbi.high.genera=="Can't find taxa in database" | tax.ncbi.high.genera=="") ]
+
+
