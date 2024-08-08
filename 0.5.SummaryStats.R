@@ -68,6 +68,8 @@ output["PostDADA2","SummedTotalNegative"] <- sum(c(colSums(neg.B5.dat),colSums(n
 output["PostDADA2","NegativeControlMean"] <- sum(c(colSums(neg.B5.dat),colSums(neg.L1.dat),colSums(neg.L2.dat)))/320
 output["PostDADA2","NegativeControlSD"] <- sqrt((sum((mean(c(colSums(neg.B5.dat),colSums(neg.L1.dat),colSums(neg.L2.dat)))-c(colSums(neg.B5.dat),colSums(neg.L1.dat),colSums(neg.L2.dat)))^2))/320-1)
 
+write.csv(output,"rawdata/summarystats.csv")
+
 
 hist(log10(c(colSums(neg.B5.dat),colSums(neg.L1.dat),colSums(neg.L2.dat))),breaks=100,xlab="log10 reads",main="")
 hist(c(colSums(neg.B5.dat),colSums(neg.L1.dat),colSums(neg.L2.dat)),breaks=100,xlab="reads",main="")
