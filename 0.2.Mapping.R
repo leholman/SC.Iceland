@@ -9,7 +9,7 @@ library(ggspatial)
 ##
 raw.metadata <- read.csv("metadata/CoreMetaData.csv")
 metadata <- raw.metadata[raw.metadata$CoreID!="GC06"&raw.metadata$CoreID!="PC022",]
-
+latlonArch <- unique(read.csv("rawdata/human/SiteLatLon.csv"))
 
 basemap(limits = c(-25, -12, 63, 67), bathymetry = TRUE)
 
@@ -30,8 +30,10 @@ dev.off()
 
 pdf("Maps/OverviewV1mini.pdf",height = 3.5,width = 4.2)
 basemap(limits = c(-25, -13, 63, 67), bathy.style = "rcb",rotate = TRUE)+
-  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("black"),crs = 4326,cex=4.5)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("black"),crs = 4326,cex=5)+
   ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = c("#52868B","#282E69"),crs = 4326,cex=4)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = latlonArch, color = "black",crs = 4326,cex=1.5)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = latlonArch, color = "goldenrod",crs = 4326,cex=1)+
   ggspatial::geom_spatial_text(aes(x = Lon, y = Lat+0.3,label=c("GC01","PC19")),data = metadata,cex=3)+
   xlab("")+
   ylab("")+
