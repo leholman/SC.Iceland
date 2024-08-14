@@ -50,6 +50,26 @@ dev.off()
 
 
 
+pdf("Maps/OverviewV1archlarge.pdf",height = 9,width = 12)
+basemap(limits = c(-25, -13, 63, 67), bathy.style = "rcb",rotate = TRUE,glaciers = TRUE)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = latlonArch, color = "black",crs = 4326,cex=1.5)+
+  ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = latlonArch, color = "goldenrod",crs = 4326,cex=1)+
+  ggspatial::geom_spatial_text_repel(aes(x = Lon, y = Lat,label=Site),data = latlonArch,cex=3)+
+  xlab("")+
+  ylab("")+
+  theme(legend.position="right",legend.box.spacing=unit(0.5, "lines"),
+        legend.key.size = unit(0.3, 'cm'), #change legend key size
+        legend.key.height = unit(0.5, 'cm'), #change legend key height
+        legend.key.width = unit(0.3, 'cm'), #change legend key width
+        legend.title = element_text(size=8), #change legend title font size
+        legend.text = element_text(size=6))+
+  #theme(legend.position.inside = c(1,1))+
+  annotation_scale(location = "bl")+ 
+  annotation_north_arrow(location = "tl", which_north = "true", height = unit(0.9, "cm"), width = unit(0.9, "cm"))
+dev.off()
+
+
+
 basemap(limits = c(-25, -12, 63, 67), bathy.style = "rcb",rotate = TRUE)+
   ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = metadata, color = "red")+
   xlab("Longitude")+

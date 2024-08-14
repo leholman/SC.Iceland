@@ -253,7 +253,7 @@ EUK.GC1.tax.c <- as.matrix(prop.table(as.matrix(EUK.GC1.tax.c[,order(ages$mean[m
 barplot(EUK.GC1.tax.a,col=rev(getPalette(dim(EUK.GC1.tax.a)[1])))
 barplot(EUK.GC1.tax.c,col=rev(getPalette(dim(EUK.GC1.tax.c)[1])))
 
-pdf("figures/EUK.GC1.tax.Family.pdf",width = 12,height = 9)
+pdf("figures/fig1/EUK.GC1.tax.Family.pdf",width = 12,height = 9)
 par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
 barplot(EUK.GC1.tax.a,las=2,cex.names=0.6,col=rev(getPalette(dim(EUK.GC1.tax.a)[1])),ylab="Read Abundance",names.arg=ages$mean[match(colnames(EUK.GC1.tax.a),ages$ID2)])
 legend(56,1,rev(rownames(EUK.GC1.tax.a)),fill=getPalette(dim(EUK.GC1.tax.a)[1]),cex=0.5,bty = "n",y.intersp=0.75)
@@ -270,7 +270,7 @@ EUK.GC1.tax.c <- as.matrix(prop.table(as.matrix(EUK.GC1.tax.c[,order(ages$mean[m
 barplot(EUK.GC1.tax.a,col=rev(getPalette(dim(EUK.GC1.tax.a)[1])))
 barplot(EUK.GC1.tax.c,col=rev(getPalette(dim(EUK.GC1.tax.c)[1])))
 
-pdf("figures/EUK.GC1.tax.cat.pdf",width = 12,height = 9)
+pdf("figures/fig1/EUK.GC1.tax.cat.pdf",width = 12,height = 9)
 par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
 barplot(EUK.GC1.tax.a,las=2,cex.names=0.6,col=rev(getPalette(dim(EUK.GC1.tax.a)[1])),ylab="Read Abundance",names.arg=ages$mean[match(colnames(EUK.GC1.tax.a),ages$ID2)])
 legend(56,1,rev(rownames(EUK.GC1.tax.a)),fill=getPalette(dim(EUK.GC1.tax.a)[1]),cex=0.5,bty = "n",y.intersp=0.75)
@@ -335,6 +335,32 @@ axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
 par(mfrow=c(1, 1))
 legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.7,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
 dev.off()
+
+pdf("figures/EUK.tax.cat.big.pdf",width = 22,height = 11)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
+barplot(EUK.P19.tax.a[,dim(EUK.P19.tax.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.P19.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.P19.tax.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+#legend(190,0.2,unique_taxa,fill=taxa_colors[unique_taxa],cex=0.5,bty = "n",y.intersp=0.75, xpd = TRUE,inset = c(-0.25, 0))
+barplot(EUK.GC1.tax.a[,dim(EUK.GC1.tax.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.GC1.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.GC1.tax.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+par(mfrow=c(1, 1))
+legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.7,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+dev.off()
+
+
+
+pdf("figures/fig1/EUK.tax.cat.blank.pdf",width = 12,height = 9)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 7.1),xpd=TRUE)
+barplot(EUK.P19.tax.a[,dim(EUK.P19.tax.a)[2]:1],las=2,col=taxa_colors[rownames(EUK.P19.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",names.arg = NA)
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2,)
+barplot(EUK.GC1.tax.a[,dim(EUK.GC1.tax.a)[2]:1],las=2,col=taxa_colors[rownames(EUK.GC1.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",names.arg = NA)
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+par(mfrow=c(1, 1))
+legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.8,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+dev.off()
+
 
 
 #### Lets produce some stats about the first ASV
@@ -947,7 +973,7 @@ prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRU
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
 
-pdf("figures/composite/codDNA.pdf",height=3,width=10)
+pdf("figures/fig2/codDNA.pdf",height=3,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(year1,value1,pch=16,col="slateblue",
      xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab="Gadus eDNA DetectionProp",xlab="",col.lab ="navyblue")
@@ -986,7 +1012,7 @@ prediction <- cbind(prediction,predict(lm1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-pdf("figures/fig2/cod-SST.pdf",width = 4.5,height = 4)
+pdf("figures/fig3/cod-SST.pdf",width = 4.5,height = 4)
 par(mar=c(4.1,4.1,2.1,2.1))
 palette(c("lightblue4","slateblue"))
 plot(lmdata$climate,jitter(lmdata$detections,amount = 0.1),pch=16,col=as.factor(lmdata$core),yaxt="n",ylab="Detection Proportion",xlab="Sea Surface temperature (°C)")
@@ -1029,7 +1055,7 @@ prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRU
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
 
-pdf("figures/composite/clupeaDNA.pdf",height=3,width=10)
+pdf("figures/fig2/clupeaDNA.pdf",height=3,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(year1,value1,pch=16,col="slateblue",ylim=c(0,8),
      xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab="Clupea eDNA DetectionProp",xlab="",col.lab ="navyblue")
@@ -1064,7 +1090,7 @@ prediction <- cbind(prediction,predict(lm1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-pdf("figures/fig2/herring-SST.pdf",width = 4.5,height = 4)
+pdf("figures/fig3/herring-SST.pdf",width = 4.5,height = 4)
 par(mar=c(4.1,4.1,2.1,2.1))
 palette(c("lightblue4","slateblue"))
 plot(lmdata$climate,jitter(lmdata$detections,amount = 0.1),pch=16,col=as.factor(lmdata$core),yaxt="n",ylab="Detection Proportion",xlab="Sea Surface temperature (°C)")
@@ -1088,7 +1114,7 @@ summary(lm(y ~ x ))
 summary(lm(y2~x2))
 
 
-## strange jellyfish
+## strange jellyfish for supplement
 
 loopASVs <- 750
 
@@ -1117,7 +1143,7 @@ prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRU
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
 
-pdf("figures/composite/p.periphyllaDNA.pdf",height=4,width=10)
+pdf("figures/ChosenTaxa/p.periphyllaDNA.pdf",height=6,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(year1,value1,pch=16,col="slateblue",ylim=c(0,8),
      xlim=c(-1550,2000),bty = 'n',xaxt="n",yaxt='n',ylab="P.periphylla DetectionProp",xlab="",col.lab ="navyblue")
@@ -1126,8 +1152,8 @@ axis(1,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE",
 points(year2,value2,pch=16,col="lightblue4")
 abline(h=4,lty=2,col="grey")
 polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
-points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
 polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
 points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
 dev.off()
 
