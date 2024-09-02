@@ -79,7 +79,8 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      xaxt = 'n', bty = 'n',
      yaxt ="n",ylab="")
 axis(4,at=c(1.5,2,2.5,3),las=2)
-mtext("Arctica d13C", side = 4, line = 3,col="green4")
+mtext(expression(Arctica~delta^13 * C~" "), side = 4, line = 3, col = "green4")
+#mtext(expression(Arctica~delta^13 * C~("%o/o")), side = 4, line = 3, col = "green4")
 points(year,valueSpline$curves$Spline,type="l",col="green4",lwd=3)
 dev.off()
 
@@ -139,7 +140,7 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      xaxt = 'n', bty = 'n',
      yaxt ="n",ylab="")
 axis(4,at=c(3,3.5,4),las=2)
-mtext("Arctica d18O", side = 4, line = 3,col="green3")
+mtext(expression(Arctica~delta^18 * O~" "), side = 4, line = 3, col = "green4")
 points(year,valueSpline$curves$Spline,type="l",col="seagreen",lwd=3)
 dev.off()
 
@@ -248,7 +249,7 @@ plot(1950-climate$year[climate$record==subset],climate$value[climate$record==sub
      xlim=c(-1550,2000),
      ylim=c(6.5,10),
      xaxt = 'n',yaxt = 'n', bty = 'n',
-     ylab ="MD99-2275Alkenone SST",
+     ylab ="MD99-2275Alkenone SST (°C)",
      col.lab = "darkgreen")
 axis(2,seq(7,10,1),las=2)
 points(1950-interpol$year,valueSpline$curves$Friedman,type="l",col="darkgreen",lwd=3)
@@ -318,7 +319,7 @@ plot(1950-climate$year[climate$record==subset],climate$value[climate$record==sub
      ylab ="")
 abline(h=8,lty=2,col="grey")
 axis(2,seq(7,10,1),las=2)
-mtext("MD99-2275DiatomTF SST", side = 2, line = 2,col="springgreen2")
+mtext("MD99-2275DiatomTF SST (°C)", side = 2, line = 2,col="springgreen2")
 points(1950-interpol$year,valueSpline$curves$Friedman,type="l",col="springgreen2",lwd=3)
 dev.off()
 
@@ -388,7 +389,7 @@ plot(climate$year[climate$record==subset],climate$value[climate$record==subset],
      yaxt="n",
      ylab ="")
 axis(4,at=c(0,1,2,3),las=2)
-mtext("MD99-2275 IP25 SeaIce", side = 4, line = 3,col="olivedrab")
+mtext("MD99-2275 IP25 SeaIce Index", side = 4, line = 3,col="olivedrab")
 points(interpol$year,valueSpline$curves$Friedman,type="l",col="olivedrab",lwd=3)
 dev.off()
 
@@ -422,7 +423,7 @@ axis(1,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE",
 dev.off()
 
 
-pdf("figures/fig1/axis.pdf",height=5,width=10)
+pdf("figures/fig2/axis.pdf",height=5,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(NA,ylim=c(0,310000),
      xlim=c(-1500,1500),
@@ -455,7 +456,7 @@ for (cent in nisp.out$cent){
 
 nisp.out$meanTarProp <- 100-nisp.out$meanMarProp
 
-pdf("figures/Fig1/HumDiet.pdf",height=2,width=4.5)
+pdf("figures/fig2/HumDiet.pdf",height=2,width=4.5)
 #par(mfrow=c(2,1))
 par(mar=c(1.1,1.1,2.1,3.1))
 barplot(t(as.matrix(nisp.out[,4:5])),col=c("lightblue","orange4"),names.arg = nisp.out$cent,border=NA,yaxt="n",main="")

@@ -50,7 +50,7 @@ dev.off()
 
 
 
-pdf("Maps/OverviewV1archlarge.pdf",height = 9,width = 12)
+pdf("Maps/OverviewV1archlarge.pdf",height = 7.5,width = 10)
 basemap(limits = c(-25, -13, 63, 67), bathy.style = "rcb",rotate = TRUE,glaciers = TRUE)+
   ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = latlonArch, color = "black",crs = 4326,cex=1.5)+
   ggspatial::geom_spatial_point(aes(x = Lon, y = Lat),data = latlonArch, color = "goldenrod",crs = 4326,cex=1)+

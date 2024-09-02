@@ -353,9 +353,9 @@ dev.off()
 
 pdf("figures/fig1/EUK.tax.cat.blank.pdf",width = 12,height = 9)
 par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 7.1),xpd=TRUE)
-barplot(EUK.P19.tax.a[,dim(EUK.P19.tax.a)[2]:1],las=2,col=taxa_colors[rownames(EUK.P19.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",names.arg = NA)
+barplot(EUK.P19.tax.a[,dim(EUK.P19.tax.a)[2]:1],las=2,col=taxa_colors[rownames(EUK.P19.tax.a)],ylab="Relative Abundance",border = NA,ylim=c(1,0),yaxt="n",xaxt = "n")
 axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2,)
-barplot(EUK.GC1.tax.a[,dim(EUK.GC1.tax.a)[2]:1],las=2,col=taxa_colors[rownames(EUK.GC1.tax.a)],ylab="Read Abundance",border = NA,ylim=c(1,0),yaxt="n",names.arg = NA)
+barplot(EUK.GC1.tax.a[,dim(EUK.GC1.tax.a)[2]:1],las=2,col=taxa_colors[rownames(EUK.GC1.tax.a)],ylab="Relative Abundance",border = NA,ylim=c(1,0),yaxt="n",xaxt = "n")
 axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
 par(mfrow=c(1, 1))
 legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.8,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
@@ -376,7 +376,7 @@ dev.off()
 
 
 
-pdf("figures/EUK.ASV1.pdf",width = 9,height = 7)
+pdf("figures/EUK.ASV227.pdf",width = 9,height = 7)
 plot(1950-ages$mean[match(names(EUK.P19.avr),ages$ID2)],EUK.P19.avr[227,],pch=16,ylab="Propotion of reads",xlab="Year",xaxt = "n",xlim=c(-1600,2000),col="navyblue")
 axis(1,at=seq(-1500,2000,500),labels = number_to_CE_label(seq(-1500,2000,500)))
 points(1950-ages$mean[match(names(EUK.GC1.avr),ages$ID2)],EUK.GC1.avr[227,],pch=16,col="cadetblue4")
@@ -409,12 +409,15 @@ gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
 plot(gam1)
 plot(gam2)
 
-prediction <- data.frame("year1"=-1103:1725)
+
+prediction2 <- data.frame("year2"=min(year2):max(year2))
+prediction <- data.frame("year1"=min(year1):max(year1))
 prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("year2"=-1561:1668)
+
+prediction2 <- data.frame("year2"=min(year2):max(year2))
 prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
@@ -462,12 +465,13 @@ gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
 plot(gam1)
 plot(gam2)
 
-prediction <- data.frame("year1"=-1103:1725)
+
+prediction <- data.frame("year1"=min(year1):max(year1))
 prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- data.frame("year2"=min(year2):max(year2))
 prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
@@ -511,12 +515,12 @@ gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
 plot(gam1)
 plot(gam2)
 
-prediction <- data.frame("year1"=-1103:1725)
+prediction <- data.frame("year1"=min(year1):max(year1))
 prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- data.frame("year2"=min(year2):max(year2))
 prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
@@ -560,12 +564,12 @@ gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
 plot(gam1)
 plot(gam2)
 
-prediction <- data.frame("year1"=-1103:1725)
+prediction <- data.frame("year1"=min(year1):max(year1))
 prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- data.frame("year2"=min(year2):max(year2))
 prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
@@ -963,12 +967,12 @@ gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
 plot(gam1)
 plot(gam2)
 
-prediction <- data.frame("year1"=-1103:1725)
+prediction <- data.frame("year1"=min(year1):max(year1))
 prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- data.frame("year2"=min(year2):max(year2))
 prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
@@ -1045,12 +1049,12 @@ gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
 plot(gam1)
 plot(gam2)
 
-prediction <- data.frame("year1"=-1103:1725)
+prediction <- data.frame("year1"=min(year1):max(year1))
 prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- data.frame("year2"=min(year2):max(year2))
 prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
@@ -1133,12 +1137,12 @@ gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
 plot(gam1)
 plot(gam2)
 
-prediction <- data.frame("year1"=-1103:1725)
+prediction <- data.frame("year1"=min(year1):max(year1))
 prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
 prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
 prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
 
-prediction2 <- data.frame("year2"=-1561:1668)
+prediction2 <- data.frame("year2"=min(year2):max(year2))
 prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
 prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
 prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96

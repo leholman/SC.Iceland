@@ -3,6 +3,8 @@
 ####==== Luke E. Holman====26.07.2024====================#######
 ################################################################
 
+library(dada2)
+
 # read in data 
 mtDat <- readxl::read_excel("metadata/AllSampleData.xlsx")
 
@@ -123,5 +125,38 @@ tax.ncbi <- read.csv("taxonomy/EUK.combined.parsed.csv",row.names = 1)
 tax.ncbi.high <- tax.ncbi[tax.ncbi$assignmentQual=="High" | tax.ncbi$assignmentQual=="High-MH" | tax.ncbi$assignmentQual=="High-MH-S",]
 tax.ncbi.high.genera <- unique(tax.ncbi.high$genus) 
 tax.ncbi.high.genera2 <- tax.ncbi.high.genera[!(is.na(tax.ncbi.high.genera) | tax.ncbi.high.genera=="Can't find taxa in database" | tax.ncbi.high.genera=="") ]
+
+
+
+
+
+### Here lets do some work on the negatives to give taoxnomic assignments etc. 
+
+## manipulation of data & taxonomy 
+neg.B5 <- read.csv("cleaneddata/negativedata/neg.B05.EUK.csv",row.names = 2)
+neg.B5.dat <- neg.B5[,2:127]
+colnames(neg.B5.dat) <- paste0("B5.",colnames(neg.B5.dat))
+neg.L1 <- read.csv("cleaneddata/negativedata/neg.LN1.EUK.csv",row.names = 2)
+neg.L1.dat <- neg.L1[,2:72]
+colnames(neg.L1.dat) <- paste0("L1.",colnames(neg.L1.dat))
+neg.L2 <- read.csv("cleaneddata/negativedata/neg.LN2.EUK.csv",row.names = 2)
+neg.L2.dat <- neg.L2[,2:87]
+colnames(neg.L2.dat) <- paste0("L2.",colnames(neg.L2.dat))
+
+allNeg <- mergeSequenceTables(t(neg.B5.dat),t(neg.L1.dat),t(neg.L2.dat),tryRC = TRUE)
+allNeg.t <- t(allNeg)
+PR2assign <- assignTaxonomy(allNeg,refFasta = "taxonomy/pr2_version_5.0.0_SSU_dada2.fasta.gz",tryRC = TRUE,multithread = TRUE,taxLevels = c("Domain","Supergroup","Division","Subdivision","Class","Order","Family","Genus","Species"),outputBootstraps = TRUE)
+PR2assignlist <- as.data.frame(cbind(PR2assign$tax,PR2assign$boot))
+
+allNeg.t.tax <- cbind(allNeg.t,PR2assignlist[match(rownames(PR2assignlist),toupper(rownames(allNeg.t))),])
+
+write.csv(allNeg.t.tax,"cleaneddata/negativedata/EUK.all.tax.csv")
+
+## Let's provide some stats 
+
+allNeg.t.tax <- read.csv("cleaneddata/negativedata/EUK.all.tax.csv",row.names = 1)
+
+
+
 
 
