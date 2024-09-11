@@ -434,6 +434,15 @@ axis(1,at=seq(-1500,1500,500),labels=paste0(sqrt(seq(-1500,1200,500)^2),c("BCE",
 dev.off()
 
 
+pdf("figures/fig1/axis.pdf",height=5,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(NA,ylim=c(0,310000),
+     xlim=c(-1000,1500),
+     bty = 'n',xaxt='n',yaxt="n",ylab="",xlab="",
+     type="l",lwd=3,col="orange")
+
+axis(1,at=seq(-1000,1500,500),labels=paste0(sqrt(seq(-1000,1500,500)^2),c("BCE","BCE","","CE","CE","CE")),lwd.ticks = 2,cex=2,lwd=0)
+dev.off()
 
 
 ## How about he NISP data

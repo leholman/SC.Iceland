@@ -4,7 +4,51 @@
 ################################################################
 
 library(dada2)
+library(RColorBrewer)
 
+
+### some functions 
+
+make_binary <- function (df,threshold){
+  df <- sapply(df, function(x) ifelse(is.numeric(x) & x < threshold, 0, 1))
+  return(as.data.frame(df))
+}
+
+CountTable <- function(in.taxonomy,in.data,output="Count",some.unassigned=T){
+  if(length(in.taxonomy)!=length(in.data[,1])){stop("Dataframe and corresponding taxonomy are not the same length")}
+  in.taxonomy[is.na(in.taxonomy)] <- ""
+  out.dat <- as.data.frame(matrix(ncol=length(in.data[1,]),nrow=length(unique(in.taxonomy))))
+  rownames(out.dat) <- sort(unique(in.taxonomy))
+  colnames(out.dat) <- colnames(in.data)    
+  out.dat.abundance <- out.dat
+  for (sample in 1:length(in.data[1,])){
+    out.dat[,sample] <- table(in.taxonomy[in.data[,sample]>0])[match(sort(unique(in.taxonomy)),names(table(in.taxonomy[in.data[,sample]>0])))]
+    out.dat.abundance[,sample] <- aggregate(in.data[,sample], by=list(Category=in.taxonomy), FUN=sum)[,2]
+  }
+  out.dat[is.na(out.dat)] <- 0
+  if(some.unassigned==T){rownames(out.dat)[1] <- "Unassigned"}
+  if(output=="Count"){return(out.dat)}else if(
+    output=="Abundance"){return(out.dat.abundance)}
+}
+
+minAbundance <- function(inputtable = NA, minAbun = 0.01) {
+  others <- rep(0, ncol(inputtable))
+  
+  for (col in 1:ncol(inputtable)) {
+    threshold = sum(inputtable[, col]) * minAbun
+    below_threshold_indices = inputtable[, col] < threshold
+    others[col] = sum(inputtable[below_threshold_indices, col])
+    inputtable[below_threshold_indices, col] = 0
+  }
+  
+  inputtable <- rbind(inputtable, others)
+  rownames(inputtable)[nrow(inputtable)] = "Others"
+  
+  # Remove rows that sum to zero
+  inputtable <- inputtable[rowSums(inputtable) != 0, ]
+  
+  return(inputtable)
+}
 # read in data 
 mtDat <- readxl::read_excel("metadata/AllSampleData.xlsx")
 
@@ -155,6 +199,102 @@ write.csv(allNeg.t.tax,"cleaneddata/negativedata/EUK.all.tax.csv")
 ## Let's provide some stats 
 
 allNeg.t.tax <- read.csv("cleaneddata/negativedata/EUK.all.tax.csv",row.names = 1)
+neg.dat <- allNeg.t.tax[,1:283]
+neg.tax <- allNeg.t.tax[,284:301]
+
+## Total number of reads 
+sum(neg.dat)
+# Reads from extraction
+sum(neg.dat[,grep("B[0-9]|Blank",colnames(neg.dat))])
+## Reads from PCR
+sum(neg.dat[,-grep("B[0-9]|Blank",colnames(neg.dat))])
+## How many ASVs
+dim(neg.dat)[1]
+
+
+## Per sample
+#reads
+missingSamples <- 320-length(colSums(neg.dat))
+colSums(neg.dat)
+neg.dat.2 <- c(colSums(neg.dat),rep(0,missingSamples) ) 
+
+mean(neg.dat.2)
+sd(neg.dat.2)
+
+# without top 2
+mean(rev(sort(neg.dat.2))[-c(1,2)])
+sd(rev(sort(neg.dat.2))[-c(1,2)])
+
+median(neg.dat.2)
+IQR(neg.dat.2)
+
+#ASVs
+neg.dat.b <- make_binary(neg.dat,1)
+length(colSums(neg.dat.b))
+
+missingSamples <- 320-length(colSums(neg.dat.b))
+neg.dat.b.2 <- c(colSums(neg.dat.b),rep(0,missingSamples))
+
+
+mean(neg.dat.b.2)
+sd(neg.dat.b.2)
+
+median(neg.dat.b.2)
+IQR(neg.dat.b.2)
+
+
+
+
+
+
+
+## How many taxonomically assigned?
+# broad taoxnomy
+table(na.omit(neg.tax$Domain[neg.tax$Domain.1>0.8]))
+# how many classes
+length(unique(na.omit(neg.tax$Class[neg.tax$Class.1>0.8])))
+# how many orders
+length(unique(na.omit(neg.tax$Order[neg.tax$Order.1>0.8])))
+# how many families
+length(unique(na.omit(neg.tax$Family[neg.tax$Family.1>0.8])))
+# how many genera
+length(unique(na.omit(neg.tax$Genus[neg.tax$Genus.1>0.8])))
+
+## Lets visualise the data 
+getPalette = colorRampPalette(brewer.pal(9, "Set3"))
+test <- as.matrix(cbind(rowSums(neg.dat[,grep("B[0-9]|Blank",colnames(neg.dat))]),
+                        rowSums(neg.dat[,-grep("B[0-9]|Blank",colnames(neg.dat))])))
+neg.a <- minAbundance(CountTable(as.character(neg.tax$Family),test,output = "Abundance"),minAbun=0.01)
+row.names(neg.a)[1] <- "Unknown"
+
+
+pdf("figures/SuppNeg/EUK.neg.pdf",height=5,width=6)
+par(mar=c(5.1, 4.1, 1.1, 12.1),xpd=TRUE)
+barplot(as.matrix(neg.a),col=rev(getPalette(dim(neg.a)[1])),ylab="Reads",names.arg=c("Extraction","PCR"),border = NA)
+legend(2.6,25000,rev(rownames(neg.a)),col=getPalette(dim(neg.a)[1]),cex=0.8,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+dev.off()
+
+
+
+neg.a <- minAbundance(CountTable(as.character(neg.tax$Subdivision),test,output = "Abundance"),minAbun=0.01)
+row.names(neg.a)[1] <- "Unknown"
+
+pdf("figures/SuppNeg/EUK.neg.broad.pdf",height=5,width=6)
+par(mar=c(5.1, 4.1, 1.1, 12.1),xpd=TRUE)
+barplot(as.matrix(neg.a),col=rev(getPalette(dim(neg.a)[1])),ylab="Reads",names.arg=c("Extraction","PCR"),border = NA)
+legend(2.6,25000,rev(rownames(neg.a)),col=getPalette(dim(neg.a)[1]),cex=0.8,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+dev.off()
+
+
+
+
+
+
+test2 <- cbind(test,neg.tax)
+
+
+
+
 
 
 
