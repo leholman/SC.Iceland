@@ -474,6 +474,35 @@ dev.off()
 barplot(t(as.matrix(cbind(nisp.out[,3]/(nisp.out[,3]+nisp.out[,2]),1-(nisp.out[,3]/(nisp.out[,3]+nisp.out[,2]))))),col=c("darkorange3","orange4"),names.arg = nisp.out$cent,border=NA,yaxt="n",main="Raw.NISP.prop")
 
 
+## now for the reviewer we check NISP for only the northern sites 
+
+nisp <- read.csv("rawdata/human/NISP_North.csv")
+
+nisp.out <- data.frame("cent"=unique(nisp$Century),
+                       "NISPter"=rep(0,length(unique(nisp$Century))),
+                       "NISPmar"=rep(0,length(unique(nisp$Century))),
+                       "meanMarProp"=rep(0,length(unique(nisp$Century))))
+
+## first lets try try a way where each site is an independent draw of the proportion. 
+
+for (cent in nisp.out$cent){
+  loopdat <- nisp[nisp$Century==cent,]
+  nisp.out$NISPter[nisp.out$cent==cent] <- sum(loopdat$Terrestrial.Mammals.NISP*loopdat$Spread)
+  nisp.out$NISPmar[nisp.out$cent==cent] <- sum(loopdat$Marine.Fish.NISP*loopdat$Spread)
+  nisp.out$meanMarProp[nisp.out$cent==cent] <- sum(loopdat$Marine.Fish*loopdat$Spread) / sum(loopdat$Spread)
+}
+
+nisp.out$meanTarProp <- 100-nisp.out$meanMarProp
+
+pdf("figures/fig2/HumDiet.North.pdf",height=2,width=4.5)
+#par(mfrow=c(2,1))
+par(mar=c(1.1,1.1,2.1,3.1))
+barplot(t(as.matrix(nisp.out[,4:5])),col=c("lightblue","orange4"),names.arg = nisp.out$cent,border=NA,yaxt="n",main="")
+dev.off()
+
+
+
+
 
 #axis(4,at=seq(0,100,20),label=seq(0,100,20),las=2)
 dev.off()

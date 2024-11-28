@@ -1001,6 +1001,7 @@ dev.off()
 lmdata <- data.frame(detections=c(loopData1,loopData2),
                      climate.TF=c(climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],climate$MD99.2275sstDiatom.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]),
                      climate.AK=c(climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],climate$MD99.2275sstAlkenone.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]),
+                     d18O=c(climate$d18O.100yrspline[match(gsub("_","-",names(loopData1)),climate$Sample)],climate$d18O.100yrspline[match(gsub("_","-",names(loopData2)),climate$Sample)]),
                      core=c(rep("PC19",length(loopData1)),rep("GC01",length(loopData2))))
 lmdata$climate <- (lmdata$climate.TF+lmdata$climate.AK)/2
 
@@ -1028,6 +1029,14 @@ axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1)
 dev.off()
 
 
+## Here we output a d18O data comparison for the reviewer 
+
+pdf("figures/fig3/cod-d18O.pdf",width = 4.5,height = 4)
+par(mar=c(4.1,4.1,2.1,2.1))
+palette(c("lightblue4","slateblue"))
+plot(lmdata$d18O,jitter(lmdata$detections,amount = 0.1),pch=16,col=as.factor(lmdata$core),yaxt="n",ylim=c(0,8),ylab="Detection Proportion",xlab=expression(paste(delta^{18}, "O (\u2030)")))
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1)
+dev.off()
 
 
 ## now clupea
