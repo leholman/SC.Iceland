@@ -957,6 +957,9 @@ loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), s
 loopData2 <- colSums(EUK.GC1[loopASVs,])
 loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
 
+DecProp.cod  <- c(loopData1,loopData2)
+
+
 year1 <- 1950-ages$mean[match(names(loopData1),ages$ID2)]
 value1 <- as.numeric(loopData1)
 year2 <- 1950-ages$mean[match(names(loopData2),ages$ID2)]
@@ -980,7 +983,7 @@ prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
 pdf("figures/fig2/codDNA.pdf",height=3,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(year1,value1,pch=16,col="slateblue",
-     xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab="Gadus eDNA DetectionProp",xlab="",col.lab ="navyblue")
+     xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab=expression(italic(Gadus) ~ " eDNA DetectionProp"),xlab="",col.lab ="navyblue")
 axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
 points(year2,value2,pch=16,col="lightblue4")
 abline(h=4,lty=2,col="grey")
@@ -1048,6 +1051,8 @@ loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), s
 loopData2 <- colSums(EUK.GC1[loopASVs,])
 loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
 
+DecProp.herri <- c(loopData1,loopData2)
+
 year1 <- 1950-ages$mean[match(names(loopData1),ages$ID2)]
 value1 <- as.numeric(loopData1)
 year2 <- 1950-ages$mean[match(names(loopData2),ages$ID2)]
@@ -1071,7 +1076,7 @@ prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
 pdf("figures/fig2/clupeaDNA.pdf",height=3,width=10)
 par(mar=c(4.1,4.1,2.1,6.1))
 plot(year1,value1,pch=16,col="slateblue",ylim=c(0,8),
-     xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab="Clupea eDNA DetectionProp",xlab="",col.lab ="navyblue")
+     xlim=c(-1550,2000),bty = 'n',xaxt='n',yaxt='n',ylab = expression(italic("Clupea") ~ " eDNA DetectionProp"),xlab="",col.lab ="navyblue")
 axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
 points(year2,value2,pch=16,col="lightblue4")
 abline(h=4,lty=2,col="grey")
@@ -1080,6 +1085,91 @@ points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
 polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
 points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
 dev.off()
+
+### Now the Sand Lances for the reviewer 
+
+## lets do one of EUK cod first 
+taxa <- "Ammodytidae"
+
+loopASVs <- EUKtax.h$OTU[EUKtax.h$Assignment==taxa]
+loopData1 <- colSums(EUK.P19[loopASVs,])
+loopData1 <- tapply(loopData1 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData1)), sum)
+loopData2 <- colSums(EUK.GC1[loopASVs,])
+loopData2 <- tapply(loopData2 > 0, gsub("(.*)_[0-9]$","\\1",names(loopData2)), sum)
+
+DecProp.lance <- c(loopData1,loopData2)
+
+year1 <- 1950-ages$mean[match(names(loopData1),ages$ID2)]
+value1 <- as.numeric(loopData1)
+year2 <- 1950-ages$mean[match(names(loopData2),ages$ID2)]
+value2 <- as.numeric(loopData2)
+
+gam1 <- gam(value1 ~ s(year1,k=20), method = "REML")
+gam2 <- gam(value2 ~ s(year2,k=20), method = "REML")
+plot(gam1)
+plot(gam2)
+
+prediction <- data.frame("year1"=min(year1):max(year1))
+prediction <- cbind(prediction,predict(gam1,newdata = prediction,se.fit = TRUE))
+prediction$uppCI <- prediction$fit+prediction$se.fit*1.96
+prediction$lwrCI <- prediction$fit-prediction$se.fit*1.96
+
+prediction2 <- data.frame("year2"=min(year2):max(year2))
+prediction2 <- cbind(prediction2,predict(gam2,newdata = prediction2,se.fit = TRUE))
+prediction2$uppCI <- prediction2$fit+prediction2$se.fit*1.96
+prediction2$lwrCI <- prediction2$fit-prediction2$se.fit*1.96
+
+pdf("figures/SpecificTaxa/AmmodytidaeDNA.pdf",height=5,width=10)
+par(mar=c(4.1,4.1,2.1,6.1))
+plot(year1,value1,pch=16,col="slateblue",
+     xlim=c(-1550,2000),bty = 'n',yaxt='n',xaxt='n',ylab=expression(italic(Ammodytidae) ~ " eDNA DetectionProp"),xlab="",col.lab ="navyblue")
+axis(2,at=c(0,2,4,6,8),label=c(0,0.25,0.5,0.75,1.0),las=1,cex.axis=0.8)
+axis(1,at=seq(-1500,2000,500),labels=paste0(sqrt(seq(-1500,2000,500)^2),c("BCE","BCE","BCE","","CE","CE","CE","CE")),lwd.ticks = 2,cex=2)
+points(year2,value2,pch=16,col="lightblue4")
+abline(h=4,lty=2,col="grey")
+polygon(c(prediction$year, rev(prediction$year)), c(prediction$uppCI, rev(prediction$lwrCI)), col=add.alpha('mediumslateblue',0.3), border=NA)
+points(prediction$year,prediction$fit,type="l",col="navyblue",lwd=3)
+polygon(c(prediction2$year, rev(prediction2$year)), c(prediction2$uppCI, rev(prediction2$lwrCI)), col=add.alpha('lightblue4',0.3), border=NA)
+points(prediction2$year,prediction2$fit,type="l",col="cadetblue4",lwd=3)
+dev.off()
+
+
+## Now let's compare the fish 
+
+## herring verses cod detection - no corr
+pdf("figures/SuppfishCorr/herr.cod.pdf",height = 5,width = 5)
+plot(jitter(DecProp.herri),jitter(DecProp.cod),col=as.factor(substr( names(DecProp.cod),1,1)),cex=0.7,pch=16,xlab=expression(italic(Clupea) ~ " eDNA DetectionProp"),ylab=expression(italic(Gadus) ~ " eDNA DetectionProp"),xlim=c(0,8))
+dev.off()
+summary(lm(DecProp.cod~DecProp.herri))
+
+## herring verses sand lance detection - no corr
+pdf("figures/SuppfishCorr/lance.herr.pdf",height = 5,width = 5)
+plot(jitter(DecProp.lance),jitter(DecProp.herri),col=as.factor(substr( names(DecProp.cod),1,1)),cex=0.7,pch=16,xlab=expression(italic(Ammodytidae) ~ " eDNA DetectionProp"),ylab=expression(italic(Clupea) ~ " eDNA DetectionProp"),xlim=c(0,8))
+dev.off()
+summary(lm(DecProp.herri~DecProp.lance))
+
+## cod verses sand lance detection -corr
+pdf("figures/SuppfishCorr/lance.cod.pdf",height = 5,width = 5)
+plot(jitter(DecProp.lance),jitter(DecProp.cod),col=as.factor(substr( names(DecProp.cod),1,1)),cex=0.7,pch=16,xlab=expression(italic(Ammodytidae) ~ " eDNA DetectionProp"),ylab=expression(italic(Gadus) ~ " eDNA DetectionProp"),xlim=c(0,8))
+abline(lm(DecProp.cod~DecProp.lance),col="darkred",lwd=2)
+dev.off()
+summary(lm(DecProp.lance~DecProp.cod))
+
+
+## cod verses sand lance detection -corr driven by small values 
+plot(jitter(DecProp.lance[DecProp.lance>3]),jitter(DecProp.cod[DecProp.lance>3]),col=as.factor(substr( names(DecProp.cod[DecProp.lance>3]),1,1)),pch=16,xlab=expression(italic(Ammodytidae) ~ " eDNA DetectionProp"),ylab=expression(italic(Gadus) ~ " eDNA DetectionProp"))
+summary(lm(DecProp.cod[DecProp.lance>3]~DecProp.lance[DecProp.lance>3]))
+
+#composite figure
+pdf("figures/SuppfishCorr/comp.pdf",height = 3,width = 8)
+par(mfrow=c(1,3))
+plot(jitter(DecProp.herri),jitter(DecProp.cod),col=as.factor(substr( names(DecProp.cod),1,1)),cex=0.7,pch=16,xlab=expression(italic(Clupea) ~ " eDNA DetectionProp"),ylab=expression(italic(Gadus) ~ " eDNA DetectionProp"),xlim=c(0,8))
+plot(jitter(DecProp.lance),jitter(DecProp.herri),col=as.factor(substr( names(DecProp.cod),1,1)),cex=0.7,pch=16,xlab=expression(italic(Ammodytidae) ~ " eDNA DetectionProp"),ylab=expression(italic(Clupea) ~ " eDNA DetectionProp"),xlim=c(0,8))
+plot(jitter(DecProp.lance),jitter(DecProp.cod),col=as.factor(substr( names(DecProp.cod),1,1)),cex=0.7,pch=16,xlab=expression(italic(Ammodytidae) ~ " eDNA DetectionProp"),ylab=expression(italic(Gadus) ~ " eDNA DetectionProp"),xlim=c(0,8))
+abline(lm(DecProp.cod~DecProp.lance),col="darkred",lwd=2)
+dev.off()
+
+
 
 ### lets compare to climate
 

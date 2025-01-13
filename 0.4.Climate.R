@@ -494,9 +494,9 @@ for (cent in nisp.out$cent){
 
 nisp.out$meanTarProp <- 100-nisp.out$meanMarProp
 
-pdf("figures/fig2/HumDiet.North.pdf",height=2,width=4.5)
+pdf("figures/fig2/HumDiet.North.pdf",height=4,width=7)
 #par(mfrow=c(2,1))
-par(mar=c(1.1,1.1,2.1,3.1))
+par(mar=c(3.1,1.1,2.1,3.1))
 barplot(t(as.matrix(nisp.out[,4:5])),col=c("lightblue","orange4"),names.arg = nisp.out$cent,border=NA,yaxt="n",main="")
 dev.off()
 
