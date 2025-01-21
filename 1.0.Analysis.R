@@ -946,6 +946,15 @@ for (taxa in unique(EUKtax.h$Assignment[EUKtax.h$Level=="Order"])){
 }
 
 
+
+#### How man OTUs are vertibrates
+
+vertTAX <- EUKtax.h[EUKtax.h$phylum=="Chordata"& EUKtax.h$assignmentQual %in% c("High-MH","High")& !(EUKtax.h$class %in% c("Ascidiacea","NA","Appendicularia","Thaliacea")) ,] 
+vertTAX2 <- vertTAX[!is.na(vertTAX$OTU),]
+vertTAX3 <- vertTAX2[vertTAX2$OTU %in% rownames(EUK.P19[rowSums(EUK.P19) > 0,]) |  vertTAX2$OTU %in% rownames(EUK.GC1[rowSums(EUK.GC1) > 0,]),]
+## 32 ASVs to vertibrates
+
+
 ### Some plots for the composite plot 
 
 ## lets do one of EUK cod first 
