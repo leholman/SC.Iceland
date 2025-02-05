@@ -361,6 +361,286 @@ par(mfrow=c(1, 1))
 legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.8,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
 dev.off()
 
+## now how about some subsets 
+
+######### Protist basic plot
+
+EUK.tax.PR2.pro <-  EUK.tax.PR2[match(rownames(EUK.p19.avr.pro),EUK.tax.PR2$X.1),]
+EUK.P19.tax.pro.a <-   as.matrix(minAbundance(CountTable(gsub("_X","",as.character(EUK.tax.PR2.pro$Subdivision)),EUK.p19.avr.pro,output = "Abundance"),minAbun=0.01))
+EUK.GC1.tax.pro.a <-   as.matrix(minAbundance(CountTable(gsub("_X","",as.character(EUK.tax.PR2.pro$Subdivision)),EUK.GC1.avr.pro,output = "Abundance"),minAbun=0.01))
+row.names(EUK.P19.tax.pro.a)[1] <- "Unknown"
+row.names(EUK.GC1.tax.pro.a)[1] <- "Unknown"
+EUK.P19.tax.pro.a <- EUK.P19.tax.pro.a[order(rownames(EUK.P19.tax.pro.a)),]
+EUK.GC1.tax.pro.a <- EUK.GC1.tax.pro.a[order(rownames(EUK.GC1.tax.pro.a)),]
+
+EUK.P19.tax.pro.a <- EUK.P19.tax.pro.a[,order(ages$mean[match(colnames(EUK.P19.tax.pro.a),ages$ID2)])]
+EUK.GC1.tax.pro.a <- EUK.GC1.tax.pro.a[,order(ages$mean[match(colnames(EUK.GC1.tax.pro.a),ages$ID2)])]
+
+unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.pro.a), rownames(EUK.GC1.tax.pro.a))))
+taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
+
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
+barplot(EUK.P19.tax.pro.a[,dim(EUK.P19.tax.pro.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.P19.tax.pro.a)],ylab="Read Abundance",border = NA,yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.P19.tax.pro.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+barplot(EUK.GC1.tax.pro.a[,dim(EUK.GC1.tax.pro.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.GC1.tax.pro.a)],ylab="Read Abundance",border = NA,yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.GC1.tax.pro.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+par(mfrow=c(1, 1))
+legend(57,0.3,unique_taxa,col=taxa_colors[unique_taxa],cex=0.7,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+
+######## Protist long plot 
+# Build abundance matrices for protists
+EUK.tax.PR2.pro <- EUK.tax.PR2[match(rownames(EUK.p19.avr.pro), EUK.tax.PR2$X.1), ]
+
+build_abundance_pro <- function(data) {
+  as.matrix(
+    minAbundance(
+      CountTable(gsub("_X", "", as.character(EUK.tax.PR2.pro$Subdivision)), data, output = "Abundance"),
+      minAbun = 0.01
+    )
+  )
+}
+
+EUK.P19.tax.pro.a <- build_abundance_pro(EUK.p19.avr.pro)
+EUK.GC1.tax.pro.a <- build_abundance_pro(EUK.GC1.avr.pro)
+
+row.names(EUK.P19.tax.pro.a)[1] <- "Unknown"
+row.names(EUK.GC1.tax.pro.a)[1] <- "Unknown"
+EUK.P19.tax.pro.a <- EUK.P19.tax.pro.a[order(rownames(EUK.P19.tax.pro.a)), ]
+EUK.GC1.tax.pro.a <- EUK.GC1.tax.pro.a[order(rownames(EUK.GC1.tax.pro.a)), ]
+
+# Sort samples by age
+sort_by_age_pro <- function(matrix, ages) {
+  idx <- match(colnames(matrix), ages$ID2)
+  matrix[, order(ages$mean[idx])]
+}
+
+EUK.P19.tax.pro.a <- sort_by_age_pro(EUK.P19.tax.pro.a, ages)
+EUK.GC1.tax.pro.a <- sort_by_age_pro(EUK.GC1.tax.pro.a, ages)
+
+# Define taxa and colors
+unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.pro.a), rownames(EUK.GC1.tax.pro.a))))
+taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
+
+# Flip P19 rows if needed
+EUK.P19.flipped <- EUK.P19.tax.pro.a
+left_data  <- -EUK.P19.flipped[,dim(EUK.P19.flipped)[2]:1]
+right_data <-  EUK.GC1.tax.pro.a[,dim(EUK.GC1.tax.pro.a)[2]:1]
+
+# Common maximum
+total_max <- max(colSums(EUK.P19.flipped), colSums(EUK.GC1.tax.pro.a))+0.2
+
+# Plot settings
+pdf("figures/SuppTAX/EUK.pro.pdf", width = 10, height = 12)
+par(mfrow = c(1,2), mar = c(4, 1, 1, 1), xpd=TRUE)
+
+# Left plot
+mp_left <- barplot(
+  left_data, horiz = TRUE, col = taxa_colors[rownames(EUK.P19.flipped)], border = NA,
+  xlim = c(-total_max, 0), xaxt = "n", names.arg = NULL
+)
+axis(side = 1, at = seq(-1, 0, by=0.1), labels = abs(seq(-1, 0, by=0.1)), las = 1)
+mtext("Read Proportion", side=1, line=3)
+axis(side=2, at=mp_left, labels=number_to_CE_label(rev(1950 - ages$mean[match(colnames(EUK.P19.flipped), ages$ID2)])), las=2, tick=FALSE, line=-4, cex.axis=0.4)
+legend(-1, 38, unique_taxa, col=taxa_colors[unique_taxa], cex=0.7, pch=15, pt.cex=2, bty="n", xpd=TRUE)
+
+# Right plot
+mp_right <- barplot(
+  right_data, horiz = TRUE, col = taxa_colors[rownames(EUK.GC1.tax.pro.a)], border = NA,
+  xlim = c(0, total_max), xaxt = "n", names.arg = rep("", ncol(right_data))
+)
+axis(side = 1, at = seq(0, 1, by=0.1), labels = seq(0, 1, by=0.1), las = 1)
+mtext("Read Proportion", side=1, line=3)
+axis(side=4, at=mp_right, labels=number_to_CE_label(rev(1950 - ages$mean[match(colnames(EUK.GC1.tax.pro.a), ages$ID2)])), las=2, tick=FALSE, line=-4, cex.axis=0.4)
+
+dev.off()
+
+
+
+#### animal basic plot
+
+EUK.tax.PR2.met <-  EUK.tax.PR2[match(rownames(EUK.p19.avr.met),EUK.tax.PR2$X.1),]
+EUK.P19.tax.met.a <-   as.matrix(minAbundance(CountTable(gsub("_X","",as.character(EUK.tax.PR2.met$Order)),EUK.p19.avr.met,output = "Abundance"),minAbun=0.01))
+EUK.GC1.tax.met.a <-   as.matrix(minAbundance(CountTable(gsub("_X","",as.character(EUK.tax.PR2.met$Order)),EUK.GC1.avr.met,output = "Abundance"),minAbun=0.01))
+row.names(EUK.P19.tax.met.a)[1] <- "Unknown"
+row.names(EUK.GC1.tax.met.a)[1] <- "Unknown"
+EUK.P19.tax.met.a <- EUK.P19.tax.met.a[order(rownames(EUK.P19.tax.met.a)),]
+EUK.GC1.tax.met.a <- EUK.GC1.tax.met.a[order(rownames(EUK.GC1.tax.met.a)),]
+
+EUK.P19.tax.met.a <- EUK.P19.tax.met.a[,order(ages$mean[match(colnames(EUK.P19.tax.met.a),ages$ID2)])]
+EUK.GC1.tax.met.a <- EUK.GC1.tax.met.a[,order(ages$mean[match(colnames(EUK.GC1.tax.met.a),ages$ID2)])]
+
+unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.met.a), rownames(EUK.GC1.tax.met.a))))
+taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
+
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
+barplot(EUK.P19.tax.met.a[,dim(EUK.P19.tax.met.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.P19.tax.met.a)],ylab="Read Abundance",border = NA,yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.P19.tax.met.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+barplot(EUK.GC1.tax.met.a[,dim(EUK.GC1.tax.met.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.GC1.tax.met.a)],ylab="Read Abundance",border = NA,yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.GC1.tax.met.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+par(mfrow=c(1, 1))
+legend(57,0.1,unique_taxa,col=taxa_colors[unique_taxa],cex=0.7,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+
+
+#### animals tall plot
+
+# Build abundance matrices
+EUK.tax.PR2.met <- EUK.tax.PR2[match(rownames(EUK.p19.avr.met), EUK.tax.PR2$X.1), ]
+
+build_abundance <- function(data) {
+  as.matrix(
+    minAbundance(
+      CountTable(gsub("_X", "", as.character(EUK.tax.PR2.met$Order)), data, output = "Abundance"),
+      minAbun = 0.01
+    )
+  )
+}
+
+EUK.P19.tax.met.a <- build_abundance(EUK.p19.avr.met)
+EUK.GC1.tax.met.a <- build_abundance(EUK.GC1.avr.met)
+
+row.names(EUK.P19.tax.met.a)[1] <- "Unknown"
+row.names(EUK.GC1.tax.met.a)[1] <- "Unknown"
+EUK.P19.tax.met.a <- EUK.P19.tax.met.a[order(rownames(EUK.P19.tax.met.a)), ]
+EUK.GC1.tax.met.a <- EUK.GC1.tax.met.a[order(rownames(EUK.GC1.tax.met.a)), ]
+
+# Sort samples by age
+sort_by_age <- function(matrix, ages) {
+  idx <- match(colnames(matrix), ages$ID2)
+  matrix[, order(ages$mean[idx])]
+}
+
+EUK.P19.tax.met.a <- sort_by_age(EUK.P19.tax.met.a, ages)
+EUK.GC1.tax.met.a <- sort_by_age(EUK.GC1.tax.met.a, ages)
+
+# Define taxa and colors
+unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.met.a), rownames(EUK.GC1.tax.met.a))))
+taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
+
+# Flip P19 rows if needed
+EUK.P19.flipped <- EUK.P19.tax.met.a
+left_data  <- -EUK.P19.flipped[,dim(EUK.P19.flipped)[2]:1]
+right_data <-  EUK.GC1.tax.met.a[,dim(EUK.GC1.tax.met.a)[2]:1]
+
+# Common maximum
+total_max <- max(colSums(EUK.P19.flipped), colSums(EUK.GC1.tax.met.a))
+
+# Plot settings
+pdf("figures/SuppTAX/EUK.met.pdf", width = 10, height = 12)
+par(mfrow = c(1,2), mar = c(4, 1, 1, 1), xpd=TRUE)
+
+# Left plot
+mp_left<- barplot(
+  left_data, horiz = TRUE, col = taxa_colors[rownames(EUK.P19.flipped)], border = NA,
+  xlim = c(-total_max, 0), xaxt = "n", names.arg = NULL
+)
+axis(side = 1, at = seq(-0.09, 0, by=0.01), labels = abs(seq(-0.09, 0, by=0.01)), las = 1)
+mtext("Read Proportion", side=1, line=3)
+axis(side=2, at=mp_left, labels=number_to_CE_label(rev(1950 - ages$mean[match(colnames(EUK.P19.flipped), ages$ID2)])), las=2, tick=FALSE, line=-4, cex.axis=0.4)
+legend(-0.07, 190, unique_taxa, col=taxa_colors[unique_taxa], cex=0.7, pch=15, pt.cex=2, bty="n", xpd=TRUE)
+
+# Right plot
+mp_right <- barplot(
+  right_data, horiz = TRUE, col = taxa_colors[rownames(EUK.GC1.tax.met.a)], border = NA,
+  xlim = c(0, total_max), xaxt = "n", names.arg = rep("", ncol(right_data))
+)
+axis(side = 1, at = seq(0, 0.09, by=0.01), labels = seq(0, 0.09, by=0.01), las = 1)
+mtext("Read Proportion", side=1, line=3)
+axis(side=4, at=mp_right, labels=number_to_CE_label(rev(1950 - ages$mean[match(colnames(EUK.GC1.tax.met.a), ages$ID2)])), las=2, tick=FALSE, line=-4, cex.axis=0.4)
+
+dev.off()
+
+# Build abundance matrices for bacteria
+EUK.tax.PR2.bac <- EUK.tax.PR2[match(rownames(EUK.p19.avr.bac), EUK.tax.PR2$X.1), ]
+
+build_abundance_bac <- function(data) {
+  as.matrix(
+    minAbundance(
+      CountTable(gsub("_X", "", as.character(EUK.tax.PR2.bac$Order)), data, output = "Abundance"),
+      minAbun = 0.01
+    )
+  )
+}
+
+EUK.P19.tax.bac.a <- build_abundance_bac(EUK.p19.avr.bac)
+EUK.GC1.tax.bac.a <- build_abundance_bac(EUK.GC1.avr.bac)
+
+row.names(EUK.P19.tax.bac.a)[1] <- "Unknown"
+row.names(EUK.GC1.tax.bac.a)[1] <- "Unknown"
+EUK.P19.tax.bac.a <- EUK.P19.tax.bac.a[order(rownames(EUK.P19.tax.bac.a)), ]
+EUK.GC1.tax.bac.a <- EUK.GC1.tax.bac.a[order(rownames(EUK.GC1.tax.bac.a)), ]
+
+# Sort samples by age
+sort_by_age_bac <- function(matrix, ages) {
+  idx <- match(colnames(matrix), ages$ID2)
+  matrix[, order(ages$mean[idx])]
+}
+
+EUK.P19.tax.bac.a <- sort_by_age_bac(EUK.P19.tax.bac.a, ages)
+EUK.GC1.tax.bac.a <- sort_by_age_bac(EUK.GC1.tax.bac.a, ages)
+
+# Define taxa and colors
+unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.bac.a), rownames(EUK.GC1.tax.bac.a))))
+taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
+
+# Basic plot
+pdf("figures/SuppTAX/EUK.bac_basic.pdf", width = 10, height = 12)
+par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
+barplot(EUK.P19.tax.bac.a[,dim(EUK.P19.tax.bac.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.P19.tax.bac.a)],ylab="Read Abundance",border = NA,yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.P19.tax.bac.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+barplot(EUK.GC1.tax.bac.a[,dim(EUK.GC1.tax.bac.a)[2]:1],las=2,cex.names=0.6,col=taxa_colors[rownames(EUK.GC1.tax.bac.a)],ylab="Read Abundance",border = NA,yaxt="n",
+        names.arg=number_to_CE_label(rev(1950-ages$mean[match(colnames(EUK.GC1.tax.bac.a),ages$ID2)])))
+axis(2,at=seq(0,1,.2),labels=rev(seq(0,1,.2)),las=2)
+par(mfrow=c(1, 1))
+legend(57,0.1,unique_taxa,col=taxa_colors[unique_taxa],cex=0.7,pch=15,pt.cex = 2,bty = "n", xpd = TRUE)
+dev.off()
+
+# Flip P19 rows if needed
+EUK.P19.flipped <- EUK.P19.tax.bac.a
+left_data  <- -EUK.P19.flipped
+right_data <-  EUK.GC1.tax.bac.a
+
+# Common maximum
+total_max <- max(colSums(EUK.P19.flipped), colSums(EUK.GC1.tax.bac.a))
+
+# Plot settings
+pdf("figures/SuppTAX/EUK.bac.pdf", width = 10, height = 12)
+par(mfrow = c(1,2), mar = c(4, 1, 1, 1), xpd=TRUE)
+
+# Left plot
+mp_left <- barplot(
+  left_data, horiz = TRUE, col = taxa_colors[rownames(EUK.P19.flipped)], border = NA,
+  xlim = c(-total_max, 0), xaxt = "n", names.arg = NULL
+)
+axis(side = 1, at = seq(-0.4, 0, by=0.05), labels = abs(seq(-0.4, 0, by=0.05)), las = 1)
+mtext("Read Proportion", side=1, line=3)
+axis(side=2, at=mp_left, labels=number_to_CE_label(rev(1950 - ages$mean[match(colnames(EUK.P19.flipped), ages$ID2)])), las=2, tick=FALSE, line=-4, cex.axis=0.4)
+
+# Right plot
+mp_right <- barplot(
+  right_data, horiz = TRUE, col = taxa_colors[rownames(EUK.GC1.tax.bac.a)], border = NA,
+  xlim = c(0, total_max), xaxt = "n", names.arg = rep("", ncol(right_data))
+)
+axis(side = 1, at = seq(0, 0.4, by=0.05), labels = seq(0,0.4, by=0.05), las = 1)
+mtext("Read Proportion", side=1, line=3)
+axis(side=4, at=mp_right, labels=number_to_CE_label(rev(1950 - ages$mean[match(colnames(EUK.GC1.tax.bac.a), ages$ID2)])), las=2, tick=FALSE, line=-4, cex.axis=0.4)
+legend(0.15, 25, unique_taxa, col=taxa_colors[unique_taxa], cex=0.7, pch=15, pt.cex=2, bty="n", xpd=TRUE)
+
+dev.off()
+
+
+
+
+
+
+
+
+
+
 
 
 #### Lets produce some stats about the first ASV
