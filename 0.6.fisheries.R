@@ -11,9 +11,6 @@ age <- read.csv("metadata/AgeOut.csv")
 cod$age <-  1950-age$mean[match(cod$X,gsub("-","_",age$ID))]
 
 
-
-
-
 ###parallel function to calcualte bootstraps
 
 bootstrap_yearly_catch_parallel <- function(df, n_simulations = 10000) {
@@ -91,7 +88,7 @@ polygon(c(df_plot$Year, rev(df_plot$Year)),
 
 points(fish_catch$Year,fish_catch$Sum,type="l",lwd=2,col="darkred")
 
-####great now lets blur the signal to give a number that is 
+####great now lets blur the signal to give a number that is a bit realistic
 
 # Gaussian weighting function with edge correction
 get_gaussian_weights <- function(window_size = 10, actual_size = NULL) {
@@ -270,3 +267,86 @@ dev.off()
 # Linear regression model
 model <- lm(cod$catch~ cod$x)
 summary(model)
+
+
+
+##### Now lets look at the data from Campana et al.!
+
+campanaCod <- read.csv("fisheries/cod_estimates_by_century_Campana.csv")
+
+
+# Define a function to classify centuries
+classify_century <- function(year) {
+  if (year > 0) {
+    century <- (year %/% 100) + 1
+    return(century)
+  } else {
+    century <- abs(year) %/% 100 + 1
+    return(-century)
+  }
+}
+
+# Apply function to the age column
+cod$century <- sapply(cod$age, classify_century)
+
+mean_values <- tapply(cod$x, cod$century, mean, na.rm = TRUE)
+sd_values <- tapply(cod$x, cod$century, sd, na.rm = TRUE)
+
+
+# Combine results into a data frame
+result_table <- data.frame(
+  Century = names(mean_values),
+  Mean = mean_values,
+  SD = sd_values
+)
+
+
+# Convert Century columns to character for consistent matching
+result_table$Century <- as.character(result_table$Century)
+
+# Filter result_table to only keep centuries present in campanaCod
+filtered_result_table <- result_table[result_table$Century %in% as.character(campanaCod$Century), ]
+
+campanaCod$meanMTBcod <- result_table$Mean[match(as.character(campanaCod$Century),result_table$Century,)]
+campanaCod$sdMTBcod <- result_table$SD[match(as.character(campanaCod$Century),result_table$Century,)]
+
+summary(lm(campanaCod$TotalCatch_000t~campanaCod$meanMTBcod))
+summary(lm(campanaCod$Adult_abundance~campanaCod$meanMTBcod))
+summary(lm(campanaCod$N~campanaCod$meanMTBcod))
+summary(lm(campanaCod$G_index~campanaCod$meanMTBcod))
+summary(lm(campanaCod$Z~campanaCod$meanMTBcod))
+summary(lm(campanaCod$CC_Z~campanaCod$meanMTBcod))
+
+campanaCod$meanMTBcod
+plot(campanaCod$Century,campanaCod$meanMTBcod,pch="-",cex=3,ylim=c(0,8))
+points(jitter(as.numeric(cod$century)),cod$x,pch=16)
+points(campanaCod$Century,campanaCod$meanMTBcod,pch="-",cex=3,col="darkred")
+
+# Lets run an ANOVA
+shapiro.test(resid(aov(cod$x[cod$century>9]~as.factor(cod$century[cod$century>9]))))
+
+# Homogeneity of variance
+leveneTest(cod$x[cod$century>9]~as.factor(cod$century[cod$century>9]))
+
+
+kruskal.test(cod$x[cod$century > 9] ~ as.factor(cod$century[cod$century > 9]))
+
+pairwise.wilcox.test(cod$x[cod$century > 9], as.factor(cod$century[cod$century > 9]), p.adjust.method = "none")
+pairwise.wilcox.test(cod$x, as.factor(cod$century))
+
+pairwise.wilcox.test(cod$x, as.factor(cod$century), p.adjust.method = "none")
+points(campanaCod$Century,campanaCod$TotalCatch_000t/10)
+
+plot(campanaCod$meanMTBcod,campanaCod$TotalCatch_000t,ylim=c(0,50))
+
+cod$centFact <- as.ordered(cod$century)
+smallCod <- cod[cod$century > 9,]
+
+
+library(brms)
+bayes_model <- brm(x ~ centFact, data = smallCod, family = cumulative())
+summary(bayes_model)
+
+mean_values <- tapply(df_plot$mean_catch, sapply(df_plot$Year, classify_century), mean, na.rm = TRUE)
+
+

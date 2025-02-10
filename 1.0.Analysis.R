@@ -363,6 +363,25 @@ dev.off()
 
 ## now how about some subsets 
 
+## we need a couple of functions here
+
+move_unknown_last_vector <- function(vec) {
+  if (!"Unknown" %in% vec) {
+    warning("No 'Unknown' value found in the vector.")
+    return(vec)
+  }
+  c(setdiff(vec, "Unknown"), "Unknown")
+}
+move_unknown_last <- function(mat) {0
+  if (!"Unknown" %in% rownames(mat)) {
+    warning("No 'Unknown' row found in the matrix.")
+    return(mat)
+  }
+  mat[c(setdiff(rownames(mat), "Unknown"), "Unknown"), , drop = FALSE]
+}
+
+
+
 ######### Protist basic plot
 
 EUK.tax.PR2.pro <-  EUK.tax.PR2[match(rownames(EUK.p19.avr.pro),EUK.tax.PR2$X.1),]
@@ -376,7 +395,12 @@ EUK.GC1.tax.pro.a <- EUK.GC1.tax.pro.a[order(rownames(EUK.GC1.tax.pro.a)),]
 EUK.P19.tax.pro.a <- EUK.P19.tax.pro.a[,order(ages$mean[match(colnames(EUK.P19.tax.pro.a),ages$ID2)])]
 EUK.GC1.tax.pro.a <- EUK.GC1.tax.pro.a[,order(ages$mean[match(colnames(EUK.GC1.tax.pro.a),ages$ID2)])]
 
+# Move unknown 
+EUK.P19.tax.met.a <- move_unknown_last(EUK.P19.tax.met.a)
+EUK.GC1.tax.met.a <- move_unknown_last(EUK.GC1.tax.met.a)
+
 unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.pro.a), rownames(EUK.GC1.tax.pro.a))))
+unique_taxa <- move_unknown_last_vector(unique_taxa)
 taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
 
 par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
@@ -471,7 +495,12 @@ EUK.GC1.tax.met.a <- EUK.GC1.tax.met.a[order(rownames(EUK.GC1.tax.met.a)),]
 EUK.P19.tax.met.a <- EUK.P19.tax.met.a[,order(ages$mean[match(colnames(EUK.P19.tax.met.a),ages$ID2)])]
 EUK.GC1.tax.met.a <- EUK.GC1.tax.met.a[,order(ages$mean[match(colnames(EUK.GC1.tax.met.a),ages$ID2)])]
 
+EUK.P19.tax.met.a <- move_unknown_last(EUK.P19.tax.met.a)
+EUK.GC1.tax.met.a <- move_unknown_last(EUK.GC1.tax.met.a)
+
 unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.met.a), rownames(EUK.GC1.tax.met.a))))
+unique_taxa <- move_unknown_last_vector(unique_taxa)
+
 taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
 
 par(mfrow=c(2,1),mar=c(5.1, 4.1, 1.1, 6.1),xpd=TRUE)
@@ -516,8 +545,12 @@ sort_by_age <- function(matrix, ages) {
 EUK.P19.tax.met.a <- sort_by_age(EUK.P19.tax.met.a, ages)
 EUK.GC1.tax.met.a <- sort_by_age(EUK.GC1.tax.met.a, ages)
 
-# Define taxa and colors
+EUK.P19.tax.met.a <- move_unknown_last(EUK.P19.tax.met.a)
+EUK.GC1.tax.met.a <- move_unknown_last(EUK.GC1.tax.met.a)
+
 unique_taxa <- sort(unique(c(rownames(EUK.P19.tax.met.a), rownames(EUK.GC1.tax.met.a))))
+unique_taxa <- move_unknown_last_vector(unique_taxa)
+
 taxa_colors <- setNames(colorRampPalette(brewer.pal(12, "Set1"))(length(unique_taxa)), unique_taxa)
 
 # Flip P19 rows if needed
@@ -631,15 +664,16 @@ axis(side=4, at=mp_right, labels=number_to_CE_label(rev(1950 - ages$mean[match(c
 legend(0.15, 25, unique_taxa, col=taxa_colors[unique_taxa], cex=0.7, pch=15, pt.cex=2, bty="n", xpd=TRUE)
 
 dev.off()
+  
 
+### lets do some detective work around the two different dominant groups in the different cores
 
+EUK.GC1.rizo <- EUK.GC1.avr[EUK.tax.PR2.bac$Order=="Rhizobiales",]
 
+match("Rhizobiales",EUK.tax.PR2.bac$Order)
+EUK.tax.PR2.bac$Order=="Rhizobiales"
 
-
-
-
-
-
+write.csv(cbind(EUK.GC1.avr.bac,EUK.p19.avr.bac,EUK.tax.PR2.bac),"cleaneddata/test.bac.csv")
 
 
 
