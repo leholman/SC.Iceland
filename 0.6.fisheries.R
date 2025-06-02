@@ -192,7 +192,7 @@ df_plot <- as_tibble(sim_results_blurred ) %>%
 
 
 plot(df_plot$Year, df_plot$mean_catch, type = "l", col = "blue", lwd = 2,
-     xlab = "Year", ylab = "Catch", main = "Bootstrap Mean Catch with 95% CI",
+     xlab = "Year", ylab = "Catch (Metric Tonnes)", main = "",
      ylim = range(12000, df_plot$upper_95),xlim = c(1500,1875))
 
 # Add shaded confidence interval
@@ -265,7 +265,7 @@ plot(cod$x, cod$catch, pch = 16, col = "darkgreen",
 dev.off()
 
 # Linear regression model
-model <- lm(cod$catch~ cod$x)
+model <- lm(cod$catch~cod$x)
 summary(model)
 
 
@@ -310,6 +310,23 @@ filtered_result_table <- result_table[result_table$Century %in% as.character(cam
 campanaCod$meanMTBcod <- result_table$Mean[match(as.character(campanaCod$Century),result_table$Century,)]
 campanaCod$sdMTBcod <- result_table$SD[match(as.character(campanaCod$Century),result_table$Century,)]
 
+
+campanaCod$Century
+cod$century
+
+cod$match(cod$century,campanaCod$Century)
+
+cod$x[match(cod$century,campanaCod$Century)]
+
+pdf("fisheries/CampanaVsMTB.pdf",height = 3,width=6)
+par(mfrow=c(1,2),mar=c(5.1,4.1,1.1,1.1))
+plot(jitter(cod$x,0.4)~campanaCod$Adult_abundance[match(cod$century,campanaCod$Century)],pch=16,cex=0.8,ylab="Cod detection proportion",xlab="Adult (6 yr+) Abundance Index")
+plot(jitter(cod$x,0.4)~campanaCod$Z[match(cod$century,campanaCod$Century)],pch=16,cex=0.8,xlab="Instantaneous mortality rate (Z)",ylab="")
+dev.off()
+
+
+campanaCod$Z[match(cod$century,campanaCod$Century)]
+
 summary(lm(campanaCod$TotalCatch_000t~campanaCod$meanMTBcod))
 summary(lm(campanaCod$Adult_abundance~campanaCod$meanMTBcod))
 summary(lm(campanaCod$N~campanaCod$meanMTBcod))
@@ -317,10 +334,20 @@ summary(lm(campanaCod$G_index~campanaCod$meanMTBcod))
 summary(lm(campanaCod$Z~campanaCod$meanMTBcod))
 summary(lm(campanaCod$CC_Z~campanaCod$meanMTBcod))
 
+
+plot(campanaCod$meanMTBcod,campanaCod$Z,pch=16)
+plot(campanaCod$meanMTBcod,campanaCod$Z,pch=16)
+
+
 campanaCod$meanMTBcod
 plot(campanaCod$Century,campanaCod$meanMTBcod,pch="-",cex=3,ylim=c(0,8))
 points(jitter(as.numeric(cod$century)),cod$x,pch=16)
 points(campanaCod$Century,campanaCod$meanMTBcod,pch="-",cex=3,col="darkred")
+
+
+
+
+
 
 # Lets run an ANOVA
 shapiro.test(resid(aov(cod$x[cod$century>9]~as.factor(cod$century[cod$century>9]))))
